@@ -18,9 +18,10 @@
 
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'maven'
 
 sourceCompatibility = 1.7
-version = '1.0'
+version = '0.1'
 
 repositories {
     mavenCentral()
@@ -29,4 +30,22 @@ repositories {
 dependencies {
     testCompile "org.codehaus.groovy:groovy-all:2.3.7"
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+}
+
+task createPom << {
+    pom {
+        project {
+            groupId 'ch.petikoch'
+            artifactId 'jtwfg'
+            version '0.1'
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+        }
+    }.writeTo("pom.xml")
 }
