@@ -16,7 +16,7 @@
 
 
 
-package ch.petikoch.jtwfg
+package ch.petikoch.libs.jtwfg
 
 import spock.lang.Specification
 

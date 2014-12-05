@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package ch.petikoch.jtwfg;
-
+package ch.petikoch.libs.jtwfg;
 
 import java.util.LinkedList;
 import java.util.List;
