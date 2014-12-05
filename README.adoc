@@ -9,7 +9,7 @@ jtwfg implements a *task wait for graph* model with a deadlock detection algorit
 
 The graph consists of *tasks* and *waits for edges*. As soon as a circular dependency exists, the involved tasks are deadlocked.
 
-image::two_tasks_deadlocked.svg[]
+image::two_tasks_deadlocked.png[]
 
 jtwfg is a small, standalone java library. The typical use case for someone is having some kind of own "execution engine" implementation
 (local, distributed, grid...) with some kind of tasks in it with optionally dependencies between the tasks.
