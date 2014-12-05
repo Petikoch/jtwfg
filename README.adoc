@@ -1,1 +1,102 @@
-= jtwfg
+= jtwfg Java library
+Peti Koch
+:imagesdir: ./docs
+:toc:
+
+== Introduction
+
+jtwfg implements a *task wait for graph* model with a deadlock detection algorithm.
+
+The graph consists of *tasks* and *waits for edges*. As soon as a circular dependency exists, the involved tasks are deadlocked.
+
+image::two_tasks_deadlocked.png[]
+
+jtwfg is a small, standalone java library. The typical use case for someone is having some kind of own "execution engine" implementation
+(local, distributed, grid...) with some kind of tasks in it with optionally dependencies between the tasks.
+Someone wants to be able to detect deadlocks at runtime in his/her engine automatically.
+
+For more details about deadlock detection algorithms see e.g. http://se.inf.ethz.ch/old/projects/daniel_moser/project_report_deadlock_detection.pdf[Daniel Moser's semester project].
+
+== Usage
+
+=== Step 1
+
+Basically you transform your domain model into the jtwfg-model using a graph builder object
+
+[source,java]
+----
+GraphBuilder builder = new GraphBuilder();
+builder.addTaskWaitFor("task 1", "task 2");
+builder.addTaskWaitFor("task 2", "task 1");
+builder.addTask("task 3");
+builder.addTask("task 4");
+Graph graph = builder.build();
+----
+
+or fluent
+
+[source,java]
+----
+GraphBuilder builder = new GraphBuilder();
+Graph graph = builder.addTaskWaitFor("task 1", "task 2")
+  .addTaskWaitFor("task 2", "task 1")
+  .addTask("task 3")
+  .addTask("task 4").build();
+----
+
+=== Step 2
+
+As soon as you have a graph instance, you can use the deadlock detector to find deadlocks.
+
+[source,java]
+----
+DeadlockDetector deadlockDetector = new DeadlockDetector();
+DeadlockAnalysisResult analyzisResult = deadlockDetector.analyze(graph);
+if(analyzisResult.hasDeadlock()){
+   // do something in your domain like throwing an exception or killing a task or ...
+}
+----
+
+=== More examples
+
+See test classes in src/test/groovy for more examples.
+
+=== Thread-safety
+
+For simplicity and comfort GraphBuilder and DeadlockDetector are threadsafe.
+
+== Requirements
+
+To use this library you need
+
+* Java 7+
+* no other libs
+
+== Installation
+
+=== Gradle
+
+Add the following dependency in your gradle build file:
+
+[source,groovy]
+----
+repositories {
+   jcenter() // Bintray's JCenter repository
+}
+
+dependencies {
+    compile 'ch.petikoch.libs.jtwfg:jtwfg:1.0.0' // or whatever explicit version
+
+    // or "latest":
+    //compile 'ch.petikoch.libs.jtwfg:jtwfg:+'
+}
+----
+
+== Support
+
+Please use GitHub issues and Pull Requests for support.
+
+== Licence
+
+Apache-2.0 licence
+

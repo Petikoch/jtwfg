@@ -1,0 +1,8 @@
+digraph two_tasks_deadlocked {
+
+	rankdir=LR;
+
+	"Task 1" -> "Task 2" [ label = "waits for" ];
+	"Task 2" -> "Task 1" [ label = "waits for" ];
+
+}
