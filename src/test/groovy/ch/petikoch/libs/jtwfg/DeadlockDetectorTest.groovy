@@ -22,101 +22,108 @@ import spock.lang.Specification
 
 class DeadlockDetectorTest extends Specification {
 
-    def testee = new DeadlockDetector()
+	def graphBuilder = new GraphBuilder<String>()
+	def testee = new DeadlockDetector<String>()
 
-    def 'findDeadlock: Simple direct cycle'() {
-        given:
-        Task t1 = new Task('t1')
-        Task t2 = new Task('t2')
-        t1.addWaitFor(t2)
-        t2.addWaitFor(t1)
-        List<Task> tasks = [t1, t2]
+	//TODO Test deadlock t1 <-> t1
+	//TODO Test threadsafty
+	//TODO Test Task#deepCopy
+	//TODO Check coverage
 
-        when:
-        DeadlockCycle result = testee.findDeadlock(tasks)
+	def 'findDeadlock: Simple direct cycle'() {
+		given:
+		graphBuilder.addTaskWaitFor('t1', 't2')
+		graphBuilder.addTaskWaitFor('t2', 't1')
+		def graph = graphBuilder.build()
 
-        then:
-        result == new DeadlockCycle(tasks)
-    }
+		when:
+		def result = testee.analyze(graph)
 
-    def 'findDeadlock: 4 tasks no dependencies'() {
-        given:
-        Task t1 = new Task('t1')
-        Task t2 = new Task('t2')
-        Task t3 = new Task('t3')
-        Task t4 = new Task('t4')
-        List<Task> tasks = [t1, t2, t3, t4]
-        when:
-        DeadlockCycle result = testee.findDeadlock(tasks)
-        then:
-        result == null
-    }
+		then:
+		result != null
+		result.hasDeadlock()
+		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't2'] as Set)] as Set
+	}
 
-    def 'findDeadlock: triangle cycle'() {
-        given:
-        Task t1 = new Task('t1')
-        Task t2 = new Task('t2')
-        Task t3 = new Task('t3')
-        t1.addWaitFor(t2)
-        t2.addWaitFor(t3)
-        t3.addWaitFor(t1)
-        List<Task> tasks = [t1, t2, t3]
+	def 'findDeadlock: 4 tasks no dependencies'() {
+		given:
+		def graph = graphBuilder.addTasks(['t1', 't2', 't3', 't4']).build()
 
-        when:
-        DeadlockCycle result = testee.findDeadlock(tasks)
+		when:
+		def result = testee.analyze(graph)
 
-        then:
-        result == new DeadlockCycle(tasks)
-    }
+		then:
+		result != null
+		!result.hasDeadlock()
+		result.deadlockCycles == [] as Set
+	}
 
-    def 'findDeadlock: square cycle'() {
-        given:
-        Task t1 = new Task('t1')
-        Task t2 = new Task('t2')
-        Task t3 = new Task('t3')
-        Task t4 = new Task('t4')
-        t1.addWaitFor(t2)
-        t2.addWaitFor(t3)
-        t3.addWaitFor(t4)
-        t4.addWaitFor(t1)
-        List<Task> tasks = [t1, t2, t3, t4]
+	def 'findDeadlock: triangle cycle'() {
+		given:
+		graphBuilder.addTaskWaitFor('t1', 't2')
+		graphBuilder.addTaskWaitFor('t2', 't3')
+		graphBuilder.addTaskWaitFor('t3', 't1')
+		def graph = graphBuilder.build()
 
-        when:
-        DeadlockCycle result = testee.findDeadlock(tasks)
+		when:
+		def result = testee.analyze(graph)
 
-        then:
-        result == new DeadlockCycle(tasks)
-    }
+		then:
+		result != null
+		result.hasDeadlock()
+		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't2', 't3'] as Set)] as Set
+	}
 
-    def 'findDeadlock: 4 tasks no locking dependencies'() {
-        given:
-        Task t1 = new Task('t1')
-        Task t2 = new Task('t2')
-        Task t3 = new Task('t3')
-        Task t4 = new Task('t4')
-        t1.addWaitForAll([t2, t3, t4])
-        t2.addWaitForAll([t3, t4])
-        t3.addWaitForAll([t4])
-        List<Task> tasks = [t1, t2, t3, t4]
-        when:
-        DeadlockCycle result = testee.findDeadlock(tasks)
-        then:
-        result == null
-    }
+	def 'findDeadlock: square cycle'() {
+		given:
+		graphBuilder.addTaskWaitFor('t1', 't2')
+		graphBuilder.addTaskWaitFor('t2', 't3')
+		graphBuilder.addTaskWaitFor('t3', 't4')
+		graphBuilder.addTaskWaitFor('t4', 't1')
+		def graph = graphBuilder.build()
 
-    def 'findDeadlock: 4 tasks with simple deadlock'() {
-        given:
-        Task t1 = new Task('t1')
-        Task t2 = new Task('t2')
-        Task t3 = new Task('t3')
-        Task t4 = new Task('t4')
-        t3.addWaitFor(t4)
-        t4.addWaitFor(t3)
-        List<Task> tasks = [t1, t2, t3, t4]
-        when:
-        DeadlockCycle result = testee.findDeadlock(tasks)
-        then:
-        result == new DeadlockCycle([t3, t4])
-    }
+		when:
+		def result = testee.analyze(graph)
+
+		then:
+		result != null
+		result.hasDeadlock()
+		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't2', 't3', 't4'] as Set)] as Set
+	}
+
+	def 'findDeadlock: 4 tasks no locking dependencies'() {
+		given:
+		graphBuilder.addTaskWaitFor('t1', 't2')
+		graphBuilder.addTaskWaitFor('t1', 't3')
+		graphBuilder.addTaskWaitFor('t1', 't4')
+		graphBuilder.addTaskWaitFor('t2', 't3')
+		graphBuilder.addTaskWaitFor('t2', 't4')
+		graphBuilder.addTaskWaitFor('t3', 't4')
+		def graph = graphBuilder.build()
+
+		when:
+		def result = testee.analyze(graph)
+
+		then:
+		result != null
+		!result.hasDeadlock()
+		result.deadlockCycles == [] as Set
+	}
+
+	def 'findDeadlock: 4 tasks with simple deadlock'() {
+		given:
+		graphBuilder.addTasks(['t1', 't2'])
+		graphBuilder.addTaskWaitFor('t3', 't4')
+		graphBuilder.addTaskWaitFor('t4', 't3')
+		def graph = graphBuilder.build()
+
+		when:
+		def result = testee.analyze(graph)
+
+		then:
+		result != null
+		result.hasDeadlock()
+		result.deadlockCycles == [new DeadlockCycle<>(['t3', 't4'] as Set)] as Set
+	}
 
 }

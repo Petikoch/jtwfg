@@ -16,37 +16,51 @@
 
 package ch.petikoch.libs.jtwfg;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public class DeadlockDetector {
+public class DeadlockDetector<T> {
 
-    private static DeadlockCycle findDeadlockRecursively(Task startTask, Set<Task> toCompareList, List<Task> hops) {
-        for (Task other : toCompareList) {
-            for (Task otherOfOther : other.getWaitForTasks()) {
-                if (startTask.equals(otherOfOther)) {
-                    List<Task> cycleList = new LinkedList<>();
-                    cycleList.add(startTask);
-                    cycleList.addAll(hops);
-                    cycleList.add(other);
-                    return new DeadlockCycle(cycleList);
-                }
-            }
-            LinkedList<Task> hopsCopy = new LinkedList<>(hops);
-            hopsCopy.add(other);
-            return findDeadlockRecursively(startTask, other.getWaitForTasks(), hopsCopy);
-        }
-        return null;
-    }
+	private static <T> void findDeadlocksDepthFirst(Task<T> startTask,
+	                                                Set<Task<T>> waitForTasks,
+	                                                List<Task<T>> hops,
+	                                                Set<DeadlockCycle<T>> cycleCollector,
+	                                                Set<Task<T>> visitedTasks) {
+		for (Task<T> otherTask : waitForTasks) {
+			List<Task<T>> hopsCopy = new LinkedList<>(hops);
+			hopsCopy.add(otherTask);
+			for (Task<T> otherOfOtherTask : otherTask.getWaitForTasks()) {
+				if (!visitedTasks.contains(otherOfOtherTask)) {
+					visitedTasks.add(otherOfOtherTask);
+					if (startTask.equals(otherOfOtherTask)) {
+						List<Task<T>> cycleList = new LinkedList<>();
+						cycleList.add(startTask);
+						cycleList.addAll(hopsCopy);
+						Set<T> cycleIdList = convert(cycleList);
+						cycleCollector.add(new DeadlockCycle<>(cycleIdList));
+					} else {
+						List<Task<T>> hopsCopy2 = new LinkedList<>(hopsCopy);
+						hopsCopy2.add(otherOfOtherTask);
+						findDeadlocksDepthFirst(startTask, otherTask.getWaitForTasks(), hopsCopy2, cycleCollector, visitedTasks);
+					}
+				}
+			}
+		}
+	}
 
-    public DeadlockCycle findDeadlock(List<Task> tasks) {
-        for (Task startTask : tasks) {
-            DeadlockCycle found = findDeadlockRecursively(startTask, startTask.getWaitForTasks(), new LinkedList<Task>());
-            if (found != null) {
-                return found;
-            }
-        }
-        return null;
-    }
+	private static <T> TreeSet<T> convert(List<Task<T>> tasks) {
+		TreeSet<T> result = new TreeSet<>();
+		for (Task<T> task : tasks) {
+			result.add(task.getId());
+		}
+		return result;
+	}
+
+	public DeadlockAnalysisResult<T> analyze(Graph<T> graph) {
+		Set<DeadlockCycle<T>> cycleCollector = new LinkedHashSet<>();
+		Set<Task<T>> visitedTasks = new HashSet<>();
+		for (Task<T> startTask : graph.getTasks()) {
+			findDeadlocksDepthFirst(startTask, startTask.getWaitForTasks(), new LinkedList<Task<T>>(), cycleCollector, visitedTasks);
+		}
+		return new DeadlockAnalysisResult<>(cycleCollector);
+	}
 }

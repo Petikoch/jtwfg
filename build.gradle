@@ -21,7 +21,7 @@ apply plugin: 'maven-publish' /*
  * limitations under the License.
  */ // "incubating"
 
-version = '0.1.1'
+version = '0.9.0'
 ext.artifactGroupId = 'ch.petikoch.libs'
 ext.description = 'A little java 7+ standalone library using a "task wait for graph" model to detect deadlocks'
 
