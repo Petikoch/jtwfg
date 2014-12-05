@@ -1,4 +1,11 @@
-/*
+plugins {
+    id "com.jfrog.bintray" version "1.0"        // https://github.com/bintray/gradle-bintray-plugin
+    id 'nu.studer.credentials' version '1.0.1'  // https://github.com/etiennestuder/gradle-credentials-plugin
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'maven-publish' /*
  * Copyright 2014 Peti Koch und Adrian Elsener
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,40 +19,154 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */ // "incubating"
 
-
-
-apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'maven'
+version = '0.1.1'
+ext.artifactGroupId = 'ch.petikoch.libs'
+ext.description = 'A little java 7+ standalone library using a "task wait for graph" model to detect deadlocks'
 
 sourceCompatibility = 1.7
-version = '0.1'
+targetCompatibility = 1.7
+
+ext.fileEncoding = 'UTF-8'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testCompile "org.codehaus.groovy:groovy-all:2.3.7"
+    testCompile 'org.codehaus.groovy:groovy-all:2.3.8'
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
 
-task createPom << {
-    pom {
-        project {
-            groupId 'ch.petikoch'
-            artifactId 'jtwfg'
-            version '0.1'
+jar {
+    manifest {
+        attributes 'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Built-Gradle': gradle.gradleVersion
+    }
+}
 
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution 'repo'
+test {
+    systemProperty 'file.encoding', project.fileEncoding
+}
+
+sourceSets.main.java.srcDirs = ['src/main/java']
+sourceSets.test.java.srcDirs = []
+sourceSets.main.groovy.srcDirs = []
+sourceSets.test.groovy.srcDirs = ['src/test/groovy']
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+tasks.withType(GroovyCompile) {
+    groovyOptions.encoding = project.fileEncoding
+    options.encoding = project.fileEncoding
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = project.fileEncoding
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+def pomConfig = {
+    name project.name
+    description project.description
+    url 'https://github.com/Petikoch/jtwfg'
+    inceptionYear '2014'
+
+    scm { url 'https://github.com/Petikoch/jtwfg.git' }
+
+    developers {
+        developer {
+            id 'petikoch'
+            name 'Peti Koch'
+            email 'petikoch@gmail.com'
+            url 'https://www.google.com/+PetiKoch'
+        }
+    }
+
+    contributors {
+        contributor {
+            name 'Adrian Elsener'
+        }
+    }
+
+    licenses {
+        license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution 'repo'
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenCustom(MavenPublication) {
+            groupId project.artifactGroupId
+            artifactId project.name
+            version project.version
+            from components.java
+
+            pom.withXml {
+                asNode().children().last() + pomConfig
+
+                // hack... build up the test dependencies ourselve
+                // why? because maven-publish plugin creates crapy dependencies in pom.xml (gradle 2.2)
+                // see http://stackoverflow.com/questions/20131915/publishing-artifact-from-gradle-project-to-bintray-maven-repository
+                // solution: http://stackoverflow.com/questions/24743562/gradle-not-including-dependencies-in-published-pom-xml
+                def dependenciesNode = asNode().appendNode('dependencies')
+                configurations.testCompile.allDependencies.each {
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', it.group)
+                    dependencyNode.appendNode('artifactId', it.name)
+                    dependencyNode.appendNode('version', it.version)
+                    dependencyNode.appendNode('scope', 'test')
                 }
             }
+
+            artifact sourceJar {
+                classifier "sources"
+            }
         }
-    }.writeTo("pom.xml")
+    }
+}
+
+model {
+    tasks.generatePomFileForMavenCustomPublication {
+        destination = file("$buildDir/generated_pom.xml")
+    }
+}
+
+bintray {
+    user = credentials.bintrayUserName       // https://github.com/etiennestuder/gradle-credentials-plugin
+    key = credentials.bintrayApiKey          // https://github.com/etiennestuder/gradle-credentials-plugin
+    publications = ['mavenCustom']   // see publications closure
+
+    publish true
+
+    pkg {
+        repo = 'maven'
+        name = project.name
+        desc = project.description // doesn't work
+        websiteUrl = 'https://github.com/Petikoch/jtwfg'
+        issueTrackerUrl = 'https://github.com/Petikoch/jtwfg/issues'
+        vcsUrl = 'https://github.com/Petikoch/jtwfg.git'
+        licenses = ['Apache-2.0']
+        labels = ['java']
+        publicDownloadNumbers = true
+    }
 }
