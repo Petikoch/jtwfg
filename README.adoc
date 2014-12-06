@@ -74,7 +74,7 @@ To use this library you need
 
 == Installation
 
-=== Gradle
+=== Gradle based build
 
 Add the following dependency in your gradle build file:
 
@@ -91,6 +91,14 @@ dependencies {
     //compile 'ch.petikoch.libs.jtwfg:jtwfg:+'
 }
 ----
+
+=== Maven based build
+
+Click "Set me up!" on the https://bintray.com/petikoch/maven/jtwfg page.
+
+=== Just the jar
+
+The jar of each released version is located here: https://bintray.com/petikoch/maven/jtwfg.
 
 == Support
 
