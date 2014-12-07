@@ -3,6 +3,8 @@ Peti Koch
 :imagesdir: ./docs
 :toc:
 
+image:https://travis-ci.org/Petikoch/jtwfg.svg?branch=master["Build Status", link="https://travis-ci.org/Petikoch/jtwfg"]
+
 == Introduction
 
 jtwfg implements a *task wait for graph* model with a deadlock detection algorithm.
