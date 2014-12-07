@@ -18,10 +18,19 @@ package ch.petikoch.libs.jtwfg;
 
 import ch.petikoch.libs.jtwfg.assertion.Preconditions;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * Represents a task in the graph.
+ * <p/>
+ * Not thread-safe.
+ *
+ * @param <T>
+ * 		The type of the ID of the task. Something with a meaningful {@link Object#equals(Object)} and {@link
+ * 		Object#hashCode()} implementation like {@link String}, {@link Long} or a class of your domain model which is fine
+ * 		to use as a key e.g. in a {@link java.util.HashMap}
+ */
 class Task<T> {
 
 	private final T id;
@@ -30,17 +39,6 @@ class Task<T> {
 	Task(T id) {
 		Preconditions.checkNotNull(id, "ID must not be null");
 		this.id = id;
-	}
-
-	private static <T> Task<T> deepCopy(Task<T> task, Set<Task<T>> alreadyCopiedTasks) {
-		Task<T> result = new Task<>(task.getId());
-		if (!alreadyCopiedTasks.contains(task)) {
-			alreadyCopiedTasks.add(result);
-			for (Task<T> waitForTask : task.getWaitForTasks()) {
-				result.addWaitFor(deepCopy(waitForTask, alreadyCopiedTasks));
-			}
-		}
-		return result;
 	}
 
 	Task addWaitFor(Task<T> other) {
@@ -82,10 +80,5 @@ class Task<T> {
 		return "Task{" +
 				"id=" + id +
 				'}';
-	}
-
-	Task<T> deepCopy() {
-		Set<Task<T>> alreadyCopiedTasks = new HashSet<>();
-		return deepCopy(this, alreadyCopiedTasks);
 	}
 }

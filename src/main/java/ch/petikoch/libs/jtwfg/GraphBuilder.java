@@ -23,45 +23,82 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+/**
+ * A builder class for graph creation. Can be used concurrently by different threads which create together the graph.
+ * <p/>
+ * Thread-safe.
+ *
+ * @param <T>
+ * 		The type of the ID of the tasks in the graph. Something with a meaningful {@link Object#equals(Object)} and {@link
+ * 		Object#hashCode()} implementation like {@link String}, {@link Long} or a class of your domain model which is fine
+ * 		to use as a key e.g. in a {@link java.util.HashMap}
+ */
 public class GraphBuilder<T> {
 
 	private final Map<T, Task<T>> taskMap = new LinkedHashMap<>();
 
 	private final Object internalLock = new Object();
 
-	private static <T> LinkedHashSet<Task<T>> copy(final Collection<Task<T>> tasks) {
-		LinkedHashSet<Task<T>> result = new LinkedHashSet<>(tasks.size());
-		for (Task<T> task : tasks) {
-			result.add(task.deepCopy());
-		}
-		return result;
-	}
-
+	/**
+	 * Adds a task in the graph, if not yet present.
+	 *
+	 * @param task
+	 * 		not null
+	 *
+	 * @return the GraphBuilder instance itself
+	 */
 	public GraphBuilder<T> addTask(T task) {
 		synchronized (internalLock) {
-			addTaskRepresentator(task);
+			getOrAddTaskRepresentator(task);
 			return this;
 		}
 	}
 
+	/**
+	 * Adds a couple of tasks in the graph, if not yet present.
+	 *
+	 * @param tasks
+	 * 		not null, may be empty
+	 *
+	 * @return the GraphBuilder instance itself
+	 */
 	public GraphBuilder<T> addTasks(Iterable<T> tasks) {
 		synchronized (internalLock) {
 			for (T task : tasks) {
-				addTaskRepresentator(task);
+				getOrAddTaskRepresentator(task);
 			}
 			return this;
 		}
 	}
 
+	/**
+	 * Adds an edge between two tasks in the graph, if not yet present.
+	 *
+	 * @param task1
+	 * 		not null
+	 * @param task2
+	 * 		not null
+	 *
+	 * @return the GraphBuilder instance itself
+	 */
 	public GraphBuilder<T> addTaskWaitFor(T task1, T task2) {
 		synchronized (internalLock) {
-			Task<T> task1Representator = addTaskRepresentator(task1);
-			Task<T> task2Representator = addTaskRepresentator(task2);
+			Task<T> task1Representator = getOrAddTaskRepresentator(task1);
+			Task<T> task2Representator = getOrAddTaskRepresentator(task2);
 			task1Representator.addWaitFor(task2Representator);
 			return this;
 		}
 	}
 
+	/**
+	 * Creates a graph instance. It creates an unmodifiable "snapshot" of the current graph situation. The
+	 * graph-snapshot wont change, even if you continue to populate the graph with the same builder instance with the
+	 * current or another thread.
+	 * <p/>
+	 * Can be called as many times you want to create as many graph snapshots you want.
+	 *
+	 * @return Graph
+	 */
 	public Graph<T> build() {
 		synchronized (internalLock) {
 			final Collection<Task<T>> tasks = taskMap.values();
@@ -70,7 +107,7 @@ public class GraphBuilder<T> {
 		}
 	}
 
-	private Task<T> addTaskRepresentator(T task) {
+	private Task<T> getOrAddTaskRepresentator(T task) {
 		Preconditions.checkNotNull(task, "task must not be null");
 
 		Task<T> taskRepresentator = taskMap.get(task);
@@ -80,5 +117,25 @@ public class GraphBuilder<T> {
 		}
 
 		return taskRepresentator;
+	}
+
+	private static <T> LinkedHashSet<Task<T>> copy(final Collection<Task<T>> originalTasks) {
+		Map<Task<T>, Task<T>> result = new LinkedHashMap<>(originalTasks.size());
+		recursiveCopy(originalTasks, result);
+		return new LinkedHashSet<>(result.values());
+	}
+
+	private static <T> void recursiveCopy(Collection<Task<T>> originalTasks, Map<Task<T>, Task<T>> result) {
+		for (Task<T> originalTask : originalTasks) {
+			Task<T> copiedTask = result.get(originalTask);
+			if (null == copiedTask) {
+				copiedTask = new Task<>(originalTask.getId());
+				result.put(originalTask, copiedTask);
+				recursiveCopy(originalTask.getWaitForTasks(), result);
+				for (Task<T> originalWaitForTask : originalTask.getWaitForTasks()) {
+					copiedTask.addWaitFor(result.get(originalWaitForTask));
+				}
+			}
+		}
 	}
 }

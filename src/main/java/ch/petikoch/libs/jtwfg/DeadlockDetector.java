@@ -18,42 +18,18 @@ package ch.petikoch.libs.jtwfg;
 
 import java.util.*;
 
+/**
+ * An implementation of an algorithm to look for deadlocks in a "task wait for model" graph. The algorithm looks for
+ * circular dependencies between tasks.
+ * <p/>
+ * Immutable / thread-safe.
+ *
+ * @param <T>
+ * 		The type of the ID of the tasks. Something with a meaningful {@link Object#equals(Object)} and {@link
+ * 		Object#hashCode()} implementation like {@link String}, {@link Long} or a class of your domain model which is fine
+ * 		to use as a key e.g. in a {@link java.util.HashMap}
+ */
 public class DeadlockDetector<T> {
-
-	private static <T> void findDeadlocksDepthFirst(Task<T> startTask,
-	                                                Set<Task<T>> waitForTasks,
-	                                                List<Task<T>> hops,
-	                                                Set<DeadlockCycle<T>> cycleCollector,
-	                                                Set<Task<T>> visitedTasks) {
-		for (Task<T> otherTask : waitForTasks) {
-			List<Task<T>> hopsCopy = new LinkedList<>(hops);
-			hopsCopy.add(otherTask);
-			for (Task<T> otherOfOtherTask : otherTask.getWaitForTasks()) {
-				if (!visitedTasks.contains(otherOfOtherTask)) {
-					visitedTasks.add(otherOfOtherTask);
-					if (startTask.equals(otherOfOtherTask)) {
-						List<Task<T>> cycleList = new LinkedList<>();
-						cycleList.add(startTask);
-						cycleList.addAll(hopsCopy);
-						Set<T> cycleIdList = convert(cycleList);
-						cycleCollector.add(new DeadlockCycle<>(cycleIdList));
-					} else {
-						List<Task<T>> hopsCopy2 = new LinkedList<>(hopsCopy);
-						hopsCopy2.add(otherOfOtherTask);
-						findDeadlocksDepthFirst(startTask, otherTask.getWaitForTasks(), hopsCopy2, cycleCollector, visitedTasks);
-					}
-				}
-			}
-		}
-	}
-
-	private static <T> TreeSet<T> convert(List<Task<T>> tasks) {
-		TreeSet<T> result = new TreeSet<>();
-		for (Task<T> task : tasks) {
-			result.add(task.getId());
-		}
-		return result;
-	}
 
 	public DeadlockAnalysisResult<T> analyze(Graph<T> graph) {
 		Set<DeadlockCycle<T>> cycleCollector = new LinkedHashSet<>();
@@ -62,5 +38,41 @@ public class DeadlockDetector<T> {
 			findDeadlocksDepthFirst(startTask, startTask.getWaitForTasks(), new LinkedList<Task<T>>(), cycleCollector, visitedTasks);
 		}
 		return new DeadlockAnalysisResult<>(cycleCollector);
+	}
+
+	private static <T> void findDeadlocksDepthFirst(Task<T> startTask,
+	                                                Set<Task<T>> waitForTasks,
+	                                                List<Task<T>> hops,
+	                                                Set<DeadlockCycle<T>> cycleCollector,
+	                                                Set<Task<T>> visitedTasks) {
+		for (Task<T> otherTask : waitForTasks) {
+			List<Task<T>> hopsCopy = new LinkedList<>(hops);
+			if (!startTask.equals(otherTask)) { // self-reference
+				hopsCopy.add(otherTask);
+			}
+			for (Task<T> otherOfOtherTask : otherTask.getWaitForTasks()) {
+				if (!visitedTasks.contains(otherOfOtherTask)) {
+					visitedTasks.add(otherOfOtherTask);
+					if (startTask.equals(otherOfOtherTask)) {
+						List<Task<T>> cycleList = new ArrayList<>(hopsCopy.size() + 2);
+						cycleList.add(startTask);
+						cycleList.addAll(hopsCopy);
+						cycleList.add(otherOfOtherTask);
+						final List<T> cycleIdList = convert(cycleList);
+						cycleCollector.add(new DeadlockCycle<>(cycleIdList));
+					} else {
+						findDeadlocksDepthFirst(startTask, otherTask.getWaitForTasks(), hopsCopy, cycleCollector, visitedTasks);
+					}
+				}
+			}
+		}
+	}
+
+	private static <T> List<T> convert(List<Task<T>> tasks) {
+		List<T> result = new ArrayList<>(tasks.size());
+		for (Task<T> task : tasks) {
+			result.add(task.getId());
+		}
+		return result;
 	}
 }

@@ -19,7 +19,19 @@ package ch.petikoch.libs.jtwfg;
 import java.util.Collections;
 import java.util.Set;
 
+/**
+ * Represents a "task wait for model" graph.
+ * <p/>
+ * Immutable / thread-safe.
+ *
+ * @param <T>
+ * 		The type of the ID of the tasks. Something with a meaningful {@link Object#equals(Object)} and {@link
+ * 		Object#hashCode()} implementation like {@link String}, {@link Long} or a class of your domain model which is fine
+ * 		to use as a key e.g. in a {@link java.util.HashMap}
+ */
 public class Graph<T> {
+
+	//TODO create Graphviz-DOT
 
 	private final Set<Task<T>> tasks;
 

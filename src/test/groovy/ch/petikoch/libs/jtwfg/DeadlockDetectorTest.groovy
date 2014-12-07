@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-
-
 package ch.petikoch.libs.jtwfg
 
 import spock.lang.Specification
@@ -25,9 +23,7 @@ class DeadlockDetectorTest extends Specification {
 	def graphBuilder = new GraphBuilder<String>()
 	def testee = new DeadlockDetector<String>()
 
-	//TODO Test deadlock t1 <-> t1
 	//TODO Test threadsafty
-	//TODO Test Task#deepCopy
 	//TODO Check coverage
 
 	def 'findDeadlock: Simple direct cycle'() {
@@ -42,7 +38,21 @@ class DeadlockDetectorTest extends Specification {
 		then:
 		result != null
 		result.hasDeadlock()
-		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't2'] as Set)] as Set
+		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't2', 't1'])] as Set
+	}
+
+	def 'findDeadlock: task referencing itself'() {
+		given:
+		graphBuilder.addTaskWaitFor('t1', 't1')
+		def graph = graphBuilder.build()
+
+		when:
+		def result = testee.analyze(graph)
+
+		then:
+		result != null
+		result.hasDeadlock()
+		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't1'])] as Set
 	}
 
 	def 'findDeadlock: 4 tasks no dependencies'() {
@@ -71,7 +81,7 @@ class DeadlockDetectorTest extends Specification {
 		then:
 		result != null
 		result.hasDeadlock()
-		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't2', 't3'] as Set)] as Set
+		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't2', 't3', 't1'])] as Set
 	}
 
 	def 'findDeadlock: square cycle'() {
@@ -88,7 +98,7 @@ class DeadlockDetectorTest extends Specification {
 		then:
 		result != null
 		result.hasDeadlock()
-		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't2', 't3', 't4'] as Set)] as Set
+		result.deadlockCycles == [new DeadlockCycle<>(['t1', 't2', 't3', 't4', 't1'])] as Set
 	}
 
 	def 'findDeadlock: 4 tasks no locking dependencies'() {
@@ -123,7 +133,7 @@ class DeadlockDetectorTest extends Specification {
 		then:
 		result != null
 		result.hasDeadlock()
-		result.deadlockCycles == [new DeadlockCycle<>(['t3', 't4'] as Set)] as Set
+		result.deadlockCycles == [new DeadlockCycle<>(['t3', 't4', 't3'])] as Set
 	}
 
 }
