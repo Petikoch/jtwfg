@@ -21,8 +21,10 @@ repositories {
 }
 
 dependencies {
-    testCompile 'org.codehaus.groovy:groovy-all:2.3.8:indy'
-    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+    testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.3.8', classifier: 'indy'
+    testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
+        exclude group: 'org.codehaus.groovy'
+    }
 }
 
 jar {
