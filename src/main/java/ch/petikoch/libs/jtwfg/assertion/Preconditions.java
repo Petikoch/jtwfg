@@ -18,9 +18,18 @@ package ch.petikoch.libs.jtwfg.assertion;
 
 public class Preconditions {
 
-	public static void checkNotNull(Object obj, String message) {
+	/**
+	 * @param obj
+	 * 		an object or null
+	 * @param message
+	 * 		or null
+	 *
+	 * @throws IllegalArgumentException
+	 * 		in case of obj is null
+	 */
+	public static void checkArgumentNotNull(Object obj, String message) {
 		if (null == obj) {
-			throw new NullPointerException(message);
+			throw new IllegalArgumentException(message);
 		}
 	}
 }

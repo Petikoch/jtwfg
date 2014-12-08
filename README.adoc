@@ -61,7 +61,7 @@ if(analyzisResult.hasDeadlock()){
 
 === More examples
 
-See test classes in src/test/groovy for more examples.
+See the link:src/test/groovy/ch/petikoch/libs/jtwfg/Documentation.groovy[executable documentation in src/test/groovy] for more examples.
 
 === Thread-safety
 

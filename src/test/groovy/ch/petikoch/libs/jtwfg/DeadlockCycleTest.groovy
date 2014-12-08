@@ -38,4 +38,22 @@ class DeadlockCycleTest extends Specification {
 		new DeadlockCycle<>([])                             | new DeadlockCycle<>(['t1'])                         | false
 		new DeadlockCycle<>(['t1', 't2', 't1'])             | new DeadlockCycle<>(['t1', 't42', 't1'])            | false
 	}
+
+	def 'equals standard behaviour'() {
+		given:
+		def cycle = new DeadlockCycle<>(['t1', 't1'])
+
+		when:
+		def isEqual = cycle.equals(cycle)
+
+		then:
+		isEqual
+
+		when:
+		def isNotEqual = !cycle.equals('egg')
+
+		then:
+		isNotEqual
+	}
 }
+

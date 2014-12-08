@@ -18,26 +18,30 @@ package ch.petikoch.libs.jtwfg;
 
 import ch.petikoch.libs.jtwfg.assertion.Preconditions;
 
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Represents a task in the graph.
+ * <p/>
+ * {@link Task} instances are comparable ({@link java.lang.Comparable}), as long the ID type T implements {@link
+ * java.lang.Comparable}.
  * <p/>
  * Not thread-safe.
  *
  * @param <T>
  * 		The type of the ID of the task. Something with a meaningful {@link Object#equals(Object)} and {@link
  * 		Object#hashCode()} implementation like {@link String}, {@link Long} or a class of your domain model which is fine
- * 		to use as a key e.g. in a {@link java.util.HashMap}
+ * 		to use as a key e.g. in a {@link java.util.HashMap}. If T implements Comparable, then you get sorted graphs.
  */
-class Task<T> {
+public class Task<T> implements Comparable<Task<T>> {
 
 	private final T id;
-	private final Set<Task<T>> waitForTasks = new LinkedHashSet<>();
+	private final Set<Task<T>> waitForTasks = new TreeSet<>();
 
 	Task(T id) {
-		Preconditions.checkNotNull(id, "ID must not be null");
+		Preconditions.checkArgumentNotNull(id, "id must not be null");
 		this.id = id;
 	}
 
@@ -46,11 +50,18 @@ class Task<T> {
 		return this;
 	}
 
-	Set<Task<T>> getWaitForTasks() {
-		return waitForTasks;
+	boolean removeWaitFor(Task<T> other) {
+		return waitForTasks.remove(other);
 	}
 
-	T getId() {
+	/**
+	 * @return an unmodifiable set of the "wait for" tasks. If Type T implements comparable, the Set is ordered.
+	 */
+	public Set<Task<T>> getWaitForTasks() {
+		return Collections.unmodifiableSet(waitForTasks);
+	}
+
+	public T getId() {
 		return id;
 	}
 
@@ -80,5 +91,14 @@ class Task<T> {
 		return "Task{" +
 				"id=" + id +
 				'}';
+	}
+
+	@Override
+	public int compareTo(final Task<T> other) {
+		if (this.getId() instanceof Comparable && other.getId() instanceof Comparable) {
+			//noinspection unchecked
+			return ((Comparable) this.getId()).compareTo(other.getId());
+		}
+		return 0;
 	}
 }

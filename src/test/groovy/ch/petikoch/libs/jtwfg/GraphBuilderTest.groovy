@@ -19,5 +19,268 @@ package ch.petikoch.libs.jtwfg
 import spock.lang.Specification
 
 class GraphBuilderTest extends Specification {
-	// TODO check copy
+
+	def testee = new GraphBuilder()
+
+	def 'addTask and build'() {
+		given:
+		def taskId1 = 't1'
+		def taskId2 = 't2'
+
+		when:
+		testee.addTask(taskId1)
+		testee.addTask(taskId2)
+
+		and:
+		def graph = testee.build()
+
+		then:
+		graph != null
+		graph.getTasks() == [new Task<String>(taskId1), new Task<String>(taskId2)] as Set
+	}
+
+	def 'addTasks and build'() {
+		given:
+		def taskId1 = 't1'
+		def taskId2 = 't2'
+
+		when:
+		testee.addTasks([taskId1, taskId2])
+
+		and:
+		def graph = testee.build()
+
+		then:
+		graph != null
+		graph.getTasks() == [new Task<String>(taskId1), new Task<String>(taskId2)] as Set
+	}
+
+	def 'addTasks, removeTask and build'() {
+		given:
+		def taskId1 = 't1'
+		def taskId2 = 't2'
+
+		when:
+		testee.addTasks([taskId1, taskId2])
+
+		and:
+		testee.removeTask(taskId1)
+		testee.removeTask(taskId2)
+
+		and:
+		def graph = testee.build()
+
+		then:
+		graph != null
+		graph.getTasks() == [] as Set
+	}
+
+	def 'addTasks, removeTasks and build'() {
+		given:
+		def taskId1 = 't1'
+		def taskId2 = 't2'
+
+		when:
+		testee.addTasks([taskId1, taskId2])
+
+		and:
+		testee.removeTasks([taskId1, taskId2])
+
+		and:
+		def graph = testee.build()
+
+		then:
+		graph != null
+		graph.getTasks() == [] as Set
+	}
+
+	def 'addTask: taskId must not be null'() {
+		when:
+		testee.addTask(null)
+
+		then:
+		def ex = thrown(IllegalArgumentException)
+		ex.message == 'taskId must not be null'
+	}
+
+	def 'removeTask: taskId must not be null'() {
+		when:
+		testee.removeTask(null)
+
+		then:
+		def ex = thrown(IllegalArgumentException)
+		ex.message == 'taskId must not be null'
+	}
+
+	def 'removeTasks: taskIds may be null or empty'() {
+		when:
+		testee.removeTasks(null)
+		then:
+		noExceptionThrown()
+
+		when:
+		testee.removeTasks([])
+		then:
+		noExceptionThrown()
+	}
+
+	def 'removeTask: taskId must have been added before'() {
+		when:
+		testee.removeTask('t1')
+
+		then:
+		def ex = thrown(IllegalArgumentException)
+		ex.message == "taskId t1 is unknown and can't be removed"
+	}
+
+	def 'removeTasks: ALL taskIds must have been added before'() {
+		given:
+		testee.addTasks(['t2', 't3'])
+
+		when:
+		testee.removeTasks(['t1', 't2'])
+
+		then:
+		def ex = thrown(IllegalArgumentException)
+		ex.message == "taskId t1 is unknown and can't be removed. None of the given tasks [t1, t2] were removed"
+	}
+
+	def 'hasTask'() {
+		given:
+		def taskId1 = 't1'
+
+		when:
+		def result = testee.hasTask(taskId1)
+
+		then:
+		!result
+
+		when:
+		testee.addTask(taskId1)
+		result = testee.hasTask(taskId1)
+
+		then:
+		result
+
+		when:
+		testee.removeTask(taskId1)
+		result = testee.hasTask(taskId1)
+
+		then:
+		!result
+	}
+
+	def 'hasTask: taskId must not be null'() {
+		when:
+		testee.hasTask(null)
+
+		then:
+		def ex = thrown(IllegalArgumentException)
+		ex.message == 'taskId must not be null'
+	}
+
+	def 'removeTaskWaitForDependency: happy flow'() {
+		setup:
+		def taskId1 = 't1'
+		def taskId2 = 't2'
+		testee.addTaskWaitFor(taskId1, taskId2)
+
+		when:
+		def graph = testee.build()
+
+		then:
+		graph.getTasks().getAt(0).getId() == taskId1
+		!graph.getTasks().getAt(0).getWaitForTasks().isEmpty()
+
+		when:
+		testee.removeTaskWaitForDependency(taskId1, taskId2)
+		graph = testee.build()
+
+		then:
+		graph.getTasks().getAt(0).getId() == taskId1
+		graph.getTasks().getAt(0).getWaitForTasks().isEmpty()
+	}
+
+	def 'removeTaskWaitForDependency: works only on existing tasks'() {
+		setup:
+		def taskId1 = 't1'
+		def taskId2 = 't2'
+		def taskId3 = 't3'
+		testee.addTaskWaitFor(taskId1, taskId2)
+		testee.addTask(taskId3)
+
+		when:
+		testee.removeTaskWaitForDependency('t42', taskId2)
+		then:
+		def ex = thrown(IllegalArgumentException)
+		ex.message == 'taskId t42 is unknown'
+
+		when:
+		testee.removeTaskWaitForDependency(taskId1, 't42')
+		then:
+		ex = thrown(IllegalArgumentException)
+		ex.message == 'taskId t42 is unknown'
+
+		when:
+		testee.removeTaskWaitForDependency(taskId1, taskId3)
+		then:
+		ex = thrown(IllegalArgumentException)
+		ex.message == 't1 is existing but was not waiting on t3'
+	}
+
+	def 'build creates always a separate graph instance with separate task instance copies'() {
+		setup:
+		def taskId1 = 't1'
+		def taskId2 = 't2'
+		def taskId3 = 't3'
+		testee.addTasks([taskId1, taskId2, taskId3])
+		testee.addTaskWaitFor(taskId1, taskId3)
+		testee.addTaskWaitFor(taskId2, taskId3)
+
+		when:
+		def graph1 = testee.build()
+		def graph2 = testee.build()
+
+		then:
+		graph1 != null
+		graph2 != null
+		!graph1.is(graph2)
+		graph1 == graph2
+		graph1.getTasks().getAt(0) == graph2.getTasks().getAt(0)
+		!graph1.getTasks().getAt(0).is(graph2.getTasks().getAt(0))
+		graph1.getTasks().getAt(1) == graph2.getTasks().getAt(1)
+		!graph1.getTasks().getAt(1).is(graph2.getTasks().getAt(1))
+		graph1.getTasks().getAt(2) == graph2.getTasks().getAt(2)
+		!graph1.getTasks().getAt(2).is(graph2.getTasks().getAt(2))
+		graph1.getTasks().getAt(0).getWaitForTasks()[0] == graph2.getTasks().getAt(0).getWaitForTasks()[0]
+		!graph1.getTasks().getAt(0).getWaitForTasks()[0].is(graph2.getTasks().getAt(0).getWaitForTasks()[0])
+		graph1.getTasks().getAt(1).getWaitForTasks()[0] == graph2.getTasks().getAt(1).getWaitForTasks()[0]
+		!graph1.getTasks().getAt(1).getWaitForTasks()[0].is(graph2.getTasks().getAt(1).getWaitForTasks()[0])
+	}
+
+	def 'adders can be called multiple times, it only adds if not yet present'() {
+		given:
+		def taskId1 = 't1'
+		def taskId2 = 't2'
+		def taskId3 = 't3'
+
+		when:
+		10.times {
+			testee.addTasks([taskId1, taskId2, taskId3])
+			testee.addTaskWaitFor(taskId1, taskId3)
+			testee.addTaskWaitFor(taskId2, taskId3)
+		}
+		def graph = testee.build()
+
+		then:
+		graph != null
+		graph.getTasks().size() == 3
+		graph.getTasks().getAt(0).getId() == taskId1
+		graph.getTasks().getAt(1).getId() == taskId2
+		graph.getTasks().getAt(2).getId() == taskId3
+		graph.getTasks().getAt(0).getWaitForTasks().size() == 1
+		graph.getTasks().getAt(0).getWaitForTasks().getAt(0).getId() == taskId3
+		graph.getTasks().getAt(1).getWaitForTasks().size() == 1
+		graph.getTasks().getAt(1).getWaitForTasks().getAt(0).getId() == taskId3
+	}
 }
