@@ -104,7 +104,7 @@ The jar of each released version is located here: https://bintray.com/petikoch/m
 
 === What is the current (latest) release?
 
-See https://bintray.com/petikoch/maven/jtwfg.
+See "versions" section in https://bintray.com/petikoch/maven/jtwfg.
 
 == Support
 
