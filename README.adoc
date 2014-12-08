@@ -25,7 +25,7 @@ For more details about deadlock detection algorithms see e.g. http://se.inf.ethz
 
 ==== Step 1
 
-Basically you transform your domain model into the jtwfg-model using a graph builder object
+At some point in time you wonder about having a deadlock and transform your domain model into the jtwfg-model using a graph builder object:
 
 [source,java]
 ----
@@ -37,7 +37,7 @@ builder.addTask("task 4");
 Graph graph = builder.build();
 ----
 
-or fluent
+You can do this also with a fluent API:
 
 [source,java]
 ----
