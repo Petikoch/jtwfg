@@ -102,6 +102,10 @@ Click "Set me up!" on the https://bintray.com/petikoch/maven/jtwfg page.
 
 The jar of each released version is located here: https://bintray.com/petikoch/maven/jtwfg.
 
+=== What is the current (latest) release?
+
+See https://bintray.com/petikoch/maven/jtwfg.
+
 == Support
 
 Please use GitHub issues and Pull Requests for support.
