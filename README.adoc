@@ -28,8 +28,8 @@ Basically you transform your domain model into the jtwfg-model using a graph bui
 [source,java]
 ----
 GraphBuilder builder = new GraphBuilder();
-builder.addTaskWaitFor("task 1", "task 2");
-builder.addTaskWaitFor("task 2", "task 1");
+builder.addTaskWaitsFor("task 1", "task 2");
+builder.addTaskWaitsFor("task 2", "task 1");
 builder.addTask("task 3");
 builder.addTask("task 4");
 Graph graph = builder.build();
@@ -40,8 +40,8 @@ or fluent
 [source,java]
 ----
 GraphBuilder builder = new GraphBuilder();
-Graph graph = builder.addTaskWaitFor("task 1", "task 2")
-  .addTaskWaitFor("task 2", "task 1")
+Graph graph = builder.addTaskWaitsFor("task 1", "task 2")
+  .addTaskWaitsFor("task 2", "task 1")
   .addTask("task 3")
   .addTask("task 4").build();
 ----

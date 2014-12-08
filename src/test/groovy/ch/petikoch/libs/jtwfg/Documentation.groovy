@@ -48,7 +48,7 @@ class Documentation extends Specification {
 			graphBuilder.addTask(myTaskIdFromMyDomainModel)
 			if (task2TaskDependencies.containsKey(myTaskIdFromMyDomainModel)) {
 				task2TaskDependencies.get(myTaskIdFromMyDomainModel).each { String waitForTaskId ->
-					graphBuilder.addTaskWaitFor(myTaskIdFromMyDomainModel, waitForTaskId)
+					graphBuilder.addTaskWaitsFor(myTaskIdFromMyDomainModel, waitForTaskId)
 				}
 			}
 		}
@@ -98,9 +98,9 @@ class Documentation extends Specification {
 		tasks.add('t3')
 		graphBuilder.addTask('t3')
 		task2TaskDependencies.put('t2', 't3')
-		graphBuilder.addTaskWaitFor('t2', 't3')
+		graphBuilder.addTaskWaitsFor('t2', 't3')
 		task2TaskDependencies.put('t3', 't2')
-		graphBuilder.addTaskWaitFor('t3', 't2')
+		graphBuilder.addTaskWaitsFor('t3', 't2')
 
 		and: 'you immediately check for deadlocks again'
 

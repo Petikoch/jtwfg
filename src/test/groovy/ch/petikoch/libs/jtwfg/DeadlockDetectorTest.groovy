@@ -28,8 +28,8 @@ class DeadlockDetectorTest extends Specification {
 
 	def 'findDeadlock: Simple direct cycle'() {
 		given:
-		graphBuilder.addTaskWaitFor('t1', 't2')
-		graphBuilder.addTaskWaitFor('t2', 't1')
+		graphBuilder.addTaskWaitsFor('t1', 't2')
+		graphBuilder.addTaskWaitsFor('t2', 't1')
 		def graph = graphBuilder.build()
 
 		when:
@@ -43,7 +43,7 @@ class DeadlockDetectorTest extends Specification {
 
 	def 'findDeadlock: task referencing itself'() {
 		given:
-		graphBuilder.addTaskWaitFor('t1', 't1')
+		graphBuilder.addTaskWaitsFor('t1', 't1')
 		def graph = graphBuilder.build()
 
 		when:
@@ -70,9 +70,9 @@ class DeadlockDetectorTest extends Specification {
 
 	def 'findDeadlock: triangle cycle'() {
 		given:
-		graphBuilder.addTaskWaitFor('t1', 't2')
-		graphBuilder.addTaskWaitFor('t2', 't3')
-		graphBuilder.addTaskWaitFor('t3', 't1')
+		graphBuilder.addTaskWaitsFor('t1', 't2')
+		graphBuilder.addTaskWaitsFor('t2', 't3')
+		graphBuilder.addTaskWaitsFor('t3', 't1')
 		def graph = graphBuilder.build()
 
 		when:
@@ -86,10 +86,10 @@ class DeadlockDetectorTest extends Specification {
 
 	def 'findDeadlock: square cycle'() {
 		given:
-		graphBuilder.addTaskWaitFor('t1', 't2')
-		graphBuilder.addTaskWaitFor('t2', 't3')
-		graphBuilder.addTaskWaitFor('t3', 't4')
-		graphBuilder.addTaskWaitFor('t4', 't1')
+		graphBuilder.addTaskWaitsFor('t1', 't2')
+		graphBuilder.addTaskWaitsFor('t2', 't3')
+		graphBuilder.addTaskWaitsFor('t3', 't4')
+		graphBuilder.addTaskWaitsFor('t4', 't1')
 		def graph = graphBuilder.build()
 
 		when:
@@ -103,12 +103,12 @@ class DeadlockDetectorTest extends Specification {
 
 	def 'findDeadlock: 4 tasks no locking dependencies'() {
 		given:
-		graphBuilder.addTaskWaitFor('t1', 't2')
-		graphBuilder.addTaskWaitFor('t1', 't3')
-		graphBuilder.addTaskWaitFor('t1', 't4')
-		graphBuilder.addTaskWaitFor('t2', 't3')
-		graphBuilder.addTaskWaitFor('t2', 't4')
-		graphBuilder.addTaskWaitFor('t3', 't4')
+		graphBuilder.addTaskWaitsFor('t1', 't2')
+		graphBuilder.addTaskWaitsFor('t1', 't3')
+		graphBuilder.addTaskWaitsFor('t1', 't4')
+		graphBuilder.addTaskWaitsFor('t2', 't3')
+		graphBuilder.addTaskWaitsFor('t2', 't4')
+		graphBuilder.addTaskWaitsFor('t3', 't4')
 		def graph = graphBuilder.build()
 
 		when:
@@ -123,8 +123,8 @@ class DeadlockDetectorTest extends Specification {
 	def 'findDeadlock: 4 tasks with simple deadlock'() {
 		given:
 		graphBuilder.addTasks(['t1', 't2'])
-		graphBuilder.addTaskWaitFor('t3', 't4')
-		graphBuilder.addTaskWaitFor('t4', 't3')
+		graphBuilder.addTaskWaitsFor('t3', 't4')
+		graphBuilder.addTaskWaitsFor('t4', 't3')
 		def graph = graphBuilder.build()
 
 		when:

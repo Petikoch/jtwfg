@@ -183,7 +183,7 @@ class GraphBuilderTest extends Specification {
 		setup:
 		def taskId1 = 't1'
 		def taskId2 = 't2'
-		testee.addTaskWaitFor(taskId1, taskId2)
+		testee.addTaskWaitsFor(taskId1, taskId2)
 
 		when:
 		def graph = testee.build()
@@ -206,7 +206,7 @@ class GraphBuilderTest extends Specification {
 		def taskId1 = 't1'
 		def taskId2 = 't2'
 		def taskId3 = 't3'
-		testee.addTaskWaitFor(taskId1, taskId2)
+		testee.addTaskWaitsFor(taskId1, taskId2)
 		testee.addTask(taskId3)
 
 		when:
@@ -234,8 +234,8 @@ class GraphBuilderTest extends Specification {
 		def taskId2 = 't2'
 		def taskId3 = 't3'
 		testee.addTasks([taskId1, taskId2, taskId3])
-		testee.addTaskWaitFor(taskId1, taskId3)
-		testee.addTaskWaitFor(taskId2, taskId3)
+		testee.addTaskWaitsFor(taskId1, taskId3)
+		testee.addTaskWaitsFor(taskId2, taskId3)
 
 		when:
 		def graph1 = testee.build()
@@ -267,8 +267,8 @@ class GraphBuilderTest extends Specification {
 		when:
 		10.times {
 			testee.addTasks([taskId1, taskId2, taskId3])
-			testee.addTaskWaitFor(taskId1, taskId3)
-			testee.addTaskWaitFor(taskId2, taskId3)
+			testee.addTaskWaitsFor(taskId1, taskId3)
+			testee.addTaskWaitsFor(taskId2, taskId3)
 		}
 		def graph = testee.build()
 

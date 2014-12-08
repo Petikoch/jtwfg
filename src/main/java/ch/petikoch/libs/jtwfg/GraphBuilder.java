@@ -179,7 +179,7 @@ public class GraphBuilder<T> {
 	 *
 	 * @return the GraphBuilder instance itself
 	 */
-	public GraphBuilder<T> addTaskWaitFor(T taskId, T waitingOnTaskId) {
+	public GraphBuilder<T> addTaskWaitsFor(T taskId, T waitingOnTaskId) {
 		synchronized (internalLock) {
 			Task<T> task = getOrAddTaskRepresentator(taskId);
 			Task<T> waitingOnTask = getOrAddTaskRepresentator(waitingOnTaskId);
