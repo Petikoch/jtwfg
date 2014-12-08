@@ -23,7 +23,7 @@ In this first example you see two tasks, each waiting for the other.
 
 image::two_tasks_deadlocked.png[]
 
-Since they are both waiting *forever* for each other, they are _deadlocked_.
+Since they are both waiting synchronously for each other *forever*, they are _deadlocked_.
 
 jtwfg can analyze such graphs and find the deadlock(s).
 
@@ -33,7 +33,7 @@ The situation in the second example is a bit more interesting.
 
 image::many_tasks_deadlocked.png[]
 
-Here, we have a circle consisting of "Task 1", "Task 2" and "Task 3". Since they are all waiting *forever* for each other, they are _deadlocked_.
+Here, we have a circle consisting of "Task 1", "Task 2" and "Task 3". Since they are all waiting synchronously for each other *forever*, they are _deadlocked_.
 "Task 4" is also _deadlocked_, although it is not in the circle. It's is waiting for a _deadlocked_ task.
 Same for "Task 6" and "Task 7", also _deadlocked_.
 
