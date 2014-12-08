@@ -98,7 +98,7 @@ dependencies {
 
 ==== Maven based build
 
-Click "Set me up!" on the https://bintray.com/petikoch/maven/jtwfg page.
+Click "Set me up!" on the https://bintray.com/petikoch/maven/jtwfg page the see the instructions.
 
 ==== Just the jar
 
