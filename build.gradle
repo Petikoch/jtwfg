@@ -132,6 +132,9 @@ publishing {
                     dependencyNode.appendNode('artifactId', it.name)
                     dependencyNode.appendNode('version', it.version)
                     dependencyNode.appendNode('scope', 'test')
+                    if (it.name == 'groovy-all') {
+                        dependencyNode.appendNode('classifier', 'indy')
+                    }
                 }
             }
 
