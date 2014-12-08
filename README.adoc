@@ -164,3 +164,14 @@ Please use GitHub issues and Pull Requests for support.
 
 Apache-2.0 licence
 
+== How to build the project
+
+If you cloned this git repository and would like to run a build on your machine, start the gradle based build using
+gradle's http://gradleware.com/registered-access?content=screencasts%2Fthe-gradle-wrapper%2F[gradlewrapper]:
+
+[source]
+----
+> ./gradlew build
+----
+
+
