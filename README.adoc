@@ -9,23 +9,54 @@ image:https://travis-ci.org/Petikoch/jtwfg.svg?branch=master["Build Status", lin
 
 jtwfg implements a *task wait for graph* model with a deadlock detection algorithm.
 
-The graph consists of *tasks* and *waits for edges*. As soon as a circular dependency exists, the involved tasks are deadlocked.
-
-image::two_tasks_deadlocked.png[]
+The graph consists of *tasks* and synchronous *waits-for edges*. As soon as a circular dependency exists, the involved tasks are _deadlocked_.
 
 jtwfg is a small, standalone java library. The typical use case for someone is having some kind of own "execution engine" implementation
 (local, distributed, grid...) with some kind of tasks in it with optionally dependencies between the tasks.
 Someone wants to be able to detect deadlocks at runtime in his/her engine automatically.
 
+At the moment, only simple, synchronous dependencies are supported by jtwfg.
+
+=== Example 1
+
+In this first example you see two tasks, each waiting for the other.
+
+image::two_tasks_deadlocked.png[]
+
+Since they are both waiting *forever* for each other, they are _deadlocked_.
+
+jtwfg can analyze such graphs and find the deadlock(s).
+
+=== Example 2
+
+The situation in the second example is a bit more interesting.
+
+image::many_tasks_deadlocked.png[]
+
+Here, we have a circle consisting of "Task 1", "Task 2" and "Task 3". Since they are all waiting *forever* for each other, they are _deadlocked_.
+"Task 4" is also _deadlocked_, although it is not in the circle. It's is waiting for a _deadlocked_ task.
+Same for "Task 6" and "Task 7", also _deadlocked_.
+
+"Task 5" is fine.
+
+jtwfg can analyze such graphs and find the deadlock(s).
+
+=== Motivation for jtwg
+
+Since I didn't found a "small" and "standalone" library for custom engine deadlock detection on the JVM, I wrote my own. Party!
+If you know a solution I didn't find, thanks for pointing to it in advance.
+
+=== More about the deadlock detection topic in general
+
 For more details about deadlock detection algorithms see e.g. http://se.inf.ethz.ch/old/projects/daniel_moser/project_report_deadlock_detection.pdf[Daniel Moser's semester project].
 
-== Usage
+== Usage of jtwfg
 
 === Basic scenario
 
 ==== Step 1
 
-At some point in time you wonder about having a deadlock in your domain model.
+At some point in time you wonder about having a deadlock in your custom engine domain model.
 You transform your domain model into the (simple) jtwfg-model using a graph builder object:
 
 [source,java]
@@ -38,20 +69,9 @@ builder.addTask("task 4");
 Graph graph = builder.build();
 ----
 
-You can do this also with a fluent API:
-
-[source,java]
-----
-GraphBuilder builder = new GraphBuilder();
-Graph graph = builder.addTaskWaitsFor("task 1", "task 2")
-  .addTaskWaitsFor("task 2", "task 1")
-  .addTask("task 3")
-  .addTask("task 4").build();
-----
-
 ==== Step 2
 
-As soon as you have a graph instance, you can use the deadlock detector to find deadlocks.
+As soon as you have a jtwfg-Graph instance, you can use the jtwfg deadlock detector to find deadlocks.
 
 [source,java]
 ----
@@ -59,6 +79,8 @@ DeadlockDetector deadlockDetector = new DeadlockDetector();
 DeadlockAnalysisResult analyzisResult = deadlockDetector.analyze(graph);
 if(analyzisResult.hasDeadlock()){
    // do something in your domain like throwing an exception or killing a task or ...
+   //
+   // System.out.println(analyzisResult)
 }
 ----
 
@@ -72,9 +94,10 @@ That's fine.
 See link:src/test/groovy/ch/petikoch/libs/jtwfg/Documentation.groovy[executable documentation in src/test/groovy] for
 this and more examples.
 
-=== Thread-safety
+=== Thread-safety of jtwfg
 
-For simplicity and comfort GraphBuilder and DeadlockDetector are threadsafe.
+For simplicity and comfort GraphBuilder and DeadlockDetector are threadsafe. If you would like to use it
+single-threaded and have performance issues, let me know.
 
 == Requirements
 

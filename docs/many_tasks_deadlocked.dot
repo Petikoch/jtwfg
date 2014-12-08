@@ -1,0 +1,13 @@
+digraph many_tasks_deadlocked {
+
+	"Task 1" -> "Task 2" [ label = "waits for" ];
+	"Task 2" -> "Task 3" [ label = "waits for" ];
+	"Task 3" -> "Task 1" [ label = "waits for" ];
+
+	"Task 4" -> "Task 2" [ label = "waits for" ];
+
+	"Task 5";
+
+	"Task 6" -> "Task 3" [ label = "waits for" ];
+	"Task 7" -> "Task 6" [ label = "waits for" ];
+}
