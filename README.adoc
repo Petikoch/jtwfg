@@ -107,7 +107,22 @@ dependencies {
 
 ==== Maven based build
 
-Click "Set me up!" on the https://bintray.com/petikoch/maven/jtwfg page the see the instructions.
+Add jtwfg as dependency to your pom.xml:
+
+[source,xml]
+----
+        <dependency>
+            <groupId>ch.petikoch.libs</groupId>
+            <artifactId>jtwfg</artifactId>
+            <version>1.0.0</version> <!-- or whatever version -->
+            <!-- or latest release (not snapshot), for the braves
+            <version>RELEASE</version>
+            -->
+        </dependency>
+----
+
+Be sure to have Bintray's JCenter repository in your maven settings.xml. If not, see "Set me up!" on the
+https://bintray.com/bintray/jcenter page for instructions to set it up.
 
 ==== Just the jar
 
