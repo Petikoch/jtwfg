@@ -21,7 +21,9 @@ For more details about deadlock detection algorithms see e.g. http://se.inf.ethz
 
 == Usage
 
-=== Step 1
+=== Basic scenario
+
+==== Step 1
 
 Basically you transform your domain model into the jtwfg-model using a graph builder object
 
@@ -46,7 +48,7 @@ Graph graph = builder.addTaskWaitsFor("task 1", "task 2")
   .addTask("task 4").build();
 ----
 
-=== Step 2
+==== Step 2
 
 As soon as you have a graph instance, you can use the deadlock detector to find deadlocks.
 
@@ -59,9 +61,13 @@ if(analyzisResult.hasDeadlock()){
 }
 ----
 
-=== More examples
+=== Scenario 2: "Update the jtwfg model" as you update your domain model and check for deadlocks on the fly
 
-See the link:src/test/groovy/ch/petikoch/libs/jtwfg/Documentation.groovy[executable documentation in src/test/groovy] for more examples.
+Probably you want to keep the jtwfg model "in sync" with your domain model and check for deadlocks on the fly
+as soon as you update both models. Probably you update your domain model and the jtwfg model by using various threads.
+
+See link:src/test/groovy/ch/petikoch/libs/jtwfg/Documentation.groovy[executable documentation in src/test/groovy] for
+this and more examples.
 
 === Thread-safety
 
