@@ -230,8 +230,8 @@ public class GraphBuilder<T> {
 			if (null == copiedTask) {
 				copiedTask = new Task<>(originalTask.getId());
 				result.put(originalTask, copiedTask);
-				recursiveCopy(originalTask.getWaitForTasks(), result);
-				for (Task<T> originalWaitForTask : originalTask.getWaitForTasks()) {
+				recursiveCopy(originalTask.getWaitsForTasks(), result);
+				for (Task<T> originalWaitForTask : originalTask.getWaitsForTasks()) {
 					copiedTask.addWaitFor(result.get(originalWaitForTask));
 				}
 			}

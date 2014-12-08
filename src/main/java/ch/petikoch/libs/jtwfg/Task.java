@@ -38,7 +38,7 @@ import java.util.TreeSet;
 public class Task<T> implements Comparable<Task<T>> {
 
 	private final T id;
-	private final Set<Task<T>> waitForTasks = new TreeSet<>();
+	private final Set<Task<T>> waitsForTasks = new TreeSet<>();
 
 	Task(T id) {
 		Preconditions.checkArgumentNotNull(id, "id must not be null");
@@ -46,19 +46,19 @@ public class Task<T> implements Comparable<Task<T>> {
 	}
 
 	Task addWaitFor(Task<T> other) {
-		waitForTasks.add(other);
+		waitsForTasks.add(other);
 		return this;
 	}
 
 	boolean removeWaitFor(Task<T> other) {
-		return waitForTasks.remove(other);
+		return waitsForTasks.remove(other);
 	}
 
 	/**
 	 * @return an unmodifiable set of the "wait for" tasks. If Type T implements comparable, the Set is ordered.
 	 */
-	public Set<Task<T>> getWaitForTasks() {
-		return Collections.unmodifiableSet(waitForTasks);
+	public Set<Task<T>> getWaitsForTasks() {
+		return Collections.unmodifiableSet(waitsForTasks);
 	}
 
 	public T getId() {

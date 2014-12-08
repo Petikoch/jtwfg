@@ -35,7 +35,7 @@ public class DeadlockDetector<T> {
 		Set<DeadlockCycle<T>> cycleCollector = new LinkedHashSet<>();
 		Set<Task<T>> visitedTasks = new HashSet<>();
 		for (Task<T> startTask : graph.getTasks()) {
-			findDeadlocksDepthFirst(startTask, startTask.getWaitForTasks(), new LinkedList<Task<T>>(), cycleCollector, visitedTasks);
+			findDeadlocksDepthFirst(startTask, startTask.getWaitsForTasks(), new LinkedList<Task<T>>(), cycleCollector, visitedTasks);
 		}
 		return new DeadlockAnalysisResult<>(cycleCollector);
 	}
@@ -50,7 +50,7 @@ public class DeadlockDetector<T> {
 			if (!startTask.equals(otherTask)) { // self-reference
 				hopsCopy.add(otherTask);
 			}
-			for (Task<T> otherOfOtherTask : otherTask.getWaitForTasks()) {
+			for (Task<T> otherOfOtherTask : otherTask.getWaitsForTasks()) {
 				if (!visitedTasks.contains(otherOfOtherTask)) {
 					visitedTasks.add(otherOfOtherTask);
 					if (startTask.equals(otherOfOtherTask)) {
@@ -61,7 +61,7 @@ public class DeadlockDetector<T> {
 						final List<T> cycleIdList = convert(cycleList);
 						cycleCollector.add(new DeadlockCycle<>(cycleIdList));
 					} else {
-						findDeadlocksDepthFirst(startTask, otherTask.getWaitForTasks(), hopsCopy, cycleCollector, visitedTasks);
+						findDeadlocksDepthFirst(startTask, otherTask.getWaitsForTasks(), hopsCopy, cycleCollector, visitedTasks);
 					}
 				}
 			}

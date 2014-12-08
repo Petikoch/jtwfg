@@ -190,7 +190,7 @@ class GraphBuilderTest extends Specification {
 
 		then:
 		graph.getTasks().getAt(0).getId() == taskId1
-		!graph.getTasks().getAt(0).getWaitForTasks().isEmpty()
+		!graph.getTasks().getAt(0).getWaitsForTasks().isEmpty()
 
 		when:
 		testee.removeTaskWaitForDependency(taskId1, taskId2)
@@ -198,7 +198,7 @@ class GraphBuilderTest extends Specification {
 
 		then:
 		graph.getTasks().getAt(0).getId() == taskId1
-		graph.getTasks().getAt(0).getWaitForTasks().isEmpty()
+		graph.getTasks().getAt(0).getWaitsForTasks().isEmpty()
 	}
 
 	def 'removeTaskWaitForDependency: works only on existing tasks'() {
@@ -252,10 +252,10 @@ class GraphBuilderTest extends Specification {
 		!graph1.getTasks().getAt(1).is(graph2.getTasks().getAt(1))
 		graph1.getTasks().getAt(2) == graph2.getTasks().getAt(2)
 		!graph1.getTasks().getAt(2).is(graph2.getTasks().getAt(2))
-		graph1.getTasks().getAt(0).getWaitForTasks()[0] == graph2.getTasks().getAt(0).getWaitForTasks()[0]
-		!graph1.getTasks().getAt(0).getWaitForTasks()[0].is(graph2.getTasks().getAt(0).getWaitForTasks()[0])
-		graph1.getTasks().getAt(1).getWaitForTasks()[0] == graph2.getTasks().getAt(1).getWaitForTasks()[0]
-		!graph1.getTasks().getAt(1).getWaitForTasks()[0].is(graph2.getTasks().getAt(1).getWaitForTasks()[0])
+		graph1.getTasks().getAt(0).getWaitsForTasks()[0] == graph2.getTasks().getAt(0).getWaitsForTasks()[0]
+		!graph1.getTasks().getAt(0).getWaitsForTasks()[0].is(graph2.getTasks().getAt(0).getWaitsForTasks()[0])
+		graph1.getTasks().getAt(1).getWaitsForTasks()[0] == graph2.getTasks().getAt(1).getWaitsForTasks()[0]
+		!graph1.getTasks().getAt(1).getWaitsForTasks()[0].is(graph2.getTasks().getAt(1).getWaitsForTasks()[0])
 	}
 
 	def 'adders can be called multiple times, it only adds if not yet present'() {
@@ -278,9 +278,9 @@ class GraphBuilderTest extends Specification {
 		graph.getTasks().getAt(0).getId() == taskId1
 		graph.getTasks().getAt(1).getId() == taskId2
 		graph.getTasks().getAt(2).getId() == taskId3
-		graph.getTasks().getAt(0).getWaitForTasks().size() == 1
-		graph.getTasks().getAt(0).getWaitForTasks().getAt(0).getId() == taskId3
-		graph.getTasks().getAt(1).getWaitForTasks().size() == 1
-		graph.getTasks().getAt(1).getWaitForTasks().getAt(0).getId() == taskId3
+		graph.getTasks().getAt(0).getWaitsForTasks().size() == 1
+		graph.getTasks().getAt(0).getWaitsForTasks().getAt(0).getId() == taskId3
+		graph.getTasks().getAt(1).getWaitsForTasks().size() == 1
+		graph.getTasks().getAt(1).getWaitsForTasks().getAt(0).getId() == taskId3
 	}
 }
