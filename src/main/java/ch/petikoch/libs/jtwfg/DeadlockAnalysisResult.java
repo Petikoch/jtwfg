@@ -31,18 +31,24 @@ import java.util.Set;
  */
 public class DeadlockAnalysisResult<T> {
 
+	private final boolean hasDeadlock;
 	private final Set<DeadlockCycle<T>> deadlockCycles;
-	private final boolean hasDeadlocks;
 
 	DeadlockAnalysisResult(final Set<DeadlockCycle<T>> deadlockCycles) {
 		this.deadlockCycles = Collections.unmodifiableSet(deadlockCycles);
-		hasDeadlocks = !this.deadlockCycles.isEmpty();
+		hasDeadlock = !this.deadlockCycles.isEmpty();
 	}
 
+	/**
+	 * @return true, if you have one or more deadlocks
+	 */
 	public boolean hasDeadlock() {
-		return hasDeadlocks;
+		return hasDeadlock;
 	}
 
+	/**
+	 * @return all found the {@link DeadlockCycle}'s (zero or more...)
+	 */
 	public Set<DeadlockCycle<T>> getDeadlockCycles() {
 		return deadlockCycles;
 	}
@@ -71,7 +77,8 @@ public class DeadlockAnalysisResult<T> {
 	@Override
 	public String toString() {
 		return "DeadlockAnalysisResult{" +
-				"deadlockCycles=" + deadlockCycles +
+				"hasDeadlock=" + hasDeadlock +
+				", deadlockCycles=" + deadlockCycles +
 				'}';
 	}
 }
