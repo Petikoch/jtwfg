@@ -108,7 +108,7 @@ single-threaded and have performance issues, let me know.
 
 To use this library you need
 
-* Java 7+
+* Java 7 or later
 * no other libs
 
 == Installation
