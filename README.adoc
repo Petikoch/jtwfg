@@ -7,6 +7,7 @@ Peti Koch
 :bintray-user: petikoch
 
 image:https://travis-ci.org/{github-user}/{project-name}.svg?branch={github-branch}["Build Status", link="https://travis-ci.org/{github-user}/{project-name}"]
+image:http://img.shields.io/coveralls/{github-user}/{project-name}.svg["Coverage Status", link="https://coveralls.io/r/{github-user}/{project-name}"]
 image:http://img.shields.io/badge/license-ASF2-blue.svg["Apache License 2", link="http://www.apache.org/licenses/LICENSE-2.0.txt"]
 image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintray.com/{bintray-user}/maven/{project-name}/_latestVersion"]
 
