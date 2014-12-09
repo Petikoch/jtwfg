@@ -128,7 +128,7 @@ repositories {
 dependencies {
     compile 'ch.petikoch.libs.jtwfg:jtwfg:1.0.0' // or whatever explicit version
 
-    // or "latest":
+    // or "latest", for the braves:
     //compile 'ch.petikoch.libs.jtwfg:jtwfg:+'
 }
 ----
