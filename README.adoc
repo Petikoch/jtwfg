@@ -1,9 +1,14 @@
 = jtwfg Java library
 Peti Koch
 :imagesdir: ./docs
-:toc:
+:project-name: jtwfg
+:github-branch: master
+:github-user: Petikoch
+:bintray-user: petikoch
 
-image:https://travis-ci.org/Petikoch/jtwfg.svg?branch=master["Build Status", link="https://travis-ci.org/Petikoch/jtwfg"]
+image:https://travis-ci.org/{github-user}/{project-name}.svg?branch={github-branch}["Build Status", link="https://travis-ci.org/{github-user}/{project-name}"]
+image:http://img.shields.io/badge/license-ASF2-blue.svg["Apache License 2", link="http://www.apache.org/licenses/LICENSE-2.0.txt"]
+image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintray.com/{bintray-user}/maven/{project-name}/_latestVersion"]
 
 == Introduction
 
@@ -149,20 +154,16 @@ https://bintray.com/bintray/jcenter page for instructions to set it up.
 
 ==== Just the jar
 
-The jar of each released version is located here: https://bintray.com/petikoch/maven/jtwfg.
+The jar of each released version is located here image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintray.com/{bintray-user}/maven/{project-name}/_latestVersion"]
 
 === What is the current (latest) release?
 
-See "versions" section in https://bintray.com/petikoch/maven/jtwfg for artifacts and
+See image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintray.com/{bintray-user}/maven/{project-name}/_latestVersion"] for artifacts and
 https://github.com/Petikoch/jtwfg/releases for release notes.
 
 == Support
 
 Please use GitHub issues and Pull Requests for support.
-
-== Licence
-
-Apache-2.0 licence
 
 == How to build the project
 
