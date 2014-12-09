@@ -156,10 +156,9 @@ https://bintray.com/bintray/jcenter page for instructions to set it up.
 
 The jar of each released version is located here image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintray.com/{bintray-user}/maven/{project-name}/_latestVersion"]
 
-=== What is the current (latest) release?
+== Release notes
 
-See image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintray.com/{bintray-user}/maven/{project-name}/_latestVersion"] for artifacts and
-https://github.com/Petikoch/jtwfg/releases for release notes.
+See https://github.com/Petikoch/jtwfg/releases.
 
 == Support
 
