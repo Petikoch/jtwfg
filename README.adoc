@@ -181,6 +181,7 @@ gradle's http://gradleware.com/registered-access?content=screencasts%2Fthe-gradl
 == My motivation to create jtwfg
 
 Since I didn't found a "small" and "standalone" library for custom engine deadlock detection on the JVM, I wrote my own. (Party!)
+
 If you know about a solution I don't know, thanks for pointing to it.
 
 
