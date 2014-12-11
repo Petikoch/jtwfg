@@ -23,7 +23,7 @@ jtwfg implements a *task wait for graph* model with a *deadlock detection algori
 
 To use the jtwfg deadlock detection, you transform your "execution engine" domain model objects into jtwfg graph model objects and call then the jtwfg deadlock detector.
 
-=== Example 1
+=== Example 1 for a deadlock in a "task wait for graph"
 
 A graph consists of *tasks* and synchronous *waits-for edges*. As soon as a circular dependency exists, the involved tasks are _deadlocked_.
 
@@ -35,7 +35,7 @@ Since they are both waiting synchronously for each other *forever*, they are _de
 
 jtwfg can analyze such graphs and find the deadlock(s).
 
-=== Example 2
+=== Example 2 for a deadlock in a "task wait for graph"
 
 The situation in the second example is a bit more interesting.
 
@@ -48,11 +48,6 @@ Same for "Task 6" and "Task 7", also _deadlocked_.
 "Task 5" is fine.
 
 jtwfg can analyze such graphs and find the deadlock(s).
-
-=== Motivation for jtwg
-
-Since I didn't found a "small" and "standalone" library for custom engine deadlock detection on the JVM, I wrote my own. Party!
-If you know an other solution I don't know about, thanks for pointing to it.
 
 === More about the deadlock detection topic in general
 
@@ -183,4 +178,11 @@ gradle's http://gradleware.com/registered-access?content=screencasts%2Fthe-gradl
 > ./gradlew build
 ----
 
+== My motivation to create jtwfg
 
+Since I didn't found a "small" and "standalone" library for custom engine deadlock detection on the JVM, I wrote my own. (Party!)
+If you know about a solution I don't know, thanks for pointing to it.
+
+
+Best regards,
+Peti
