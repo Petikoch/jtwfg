@@ -180,10 +180,16 @@ gradle's http://gradleware.com/registered-access?content=screencasts%2Fthe-gradl
 
 == My motivation to create jtwfg
 
-Since I didn't found a "small" and "standalone" library for custom engine deadlock detection on the JVM, I wrote my own. (Party!)
+=== Motivation 1
 
-If you know about a solution I don't know, thanks for pointing to it.
+Since I didn't found a "small" and "standalone" library for custom engine deadlock detection on the JVM, I wrote my own.
+If you know about a solution, thanks for notifying me.
 
+=== Motivation 2
+
+I wanted to try the common open source platforms and tools like Github, Bintray, Travis-CI, Coveralls... and what's better
+than to do this with an own little open source project?
 
 Best regards,
-Peti
+
+image::Signature.jpg[]
