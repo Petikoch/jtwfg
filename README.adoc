@@ -13,17 +13,19 @@ image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintr
 
 == Introduction
 
-jtwfg implements a *task wait for graph* model with a deadlock detection algorithm.
+*jtwfg* is a small, standalone java library.
 
-The graph consists of *tasks* and synchronous *waits-for edges*. As soon as a circular dependency exists, the involved tasks are _deadlocked_.
+The typical use case for someone is having some kind of own "execution engine" implementation
+(local, distributed, grid...) with some kind of tasks in it, with optionally dependencies between the tasks.
+Someone wants to be able to *easily detect deadlocks* at runtime in his/her engine.
 
-jtwfg is a small, standalone java library. The typical use case for someone is having some kind of own "execution engine" implementation
-(local, distributed, grid...) with some kind of tasks in it with optionally dependencies between the tasks.
-Someone wants to be able to detect deadlocks at runtime in his/her engine automatically.
+jtwfg implements a *task wait for graph* model with a *deadlock detection algorithm*.
 
-At the moment, only simple, synchronous dependencies are supported by jtwfg.
+To use the jtwfg deadlock detection, you transform your "execution engine" domain model objects into jtwfg graph model objects and call then the jtwfg deadlock detector.
 
 === Example 1
+
+A graph consists of *tasks* and synchronous *waits-for edges*. As soon as a circular dependency exists, the involved tasks are _deadlocked_.
 
 In this first example you see two tasks, each waiting for the other.
 
@@ -50,7 +52,7 @@ jtwfg can analyze such graphs and find the deadlock(s).
 === Motivation for jtwg
 
 Since I didn't found a "small" and "standalone" library for custom engine deadlock detection on the JVM, I wrote my own. Party!
-If you know a solution I didn't find, thanks for pointing to it in advance.
+If you know an other solution I don't know about, thanks for pointing to it.
 
 === More about the deadlock detection topic in general
 
@@ -62,8 +64,8 @@ For more details about deadlock detection algorithms see e.g. http://se.inf.ethz
 
 ==== Step 1
 
-At some point in time you wonder about having a deadlock in your custom engine domain model.
-You transform your domain model into the (simple) jtwfg-model using a graph builder object:
+At some point in time you wonder about having a deadlock in your custom engine domain model objects.
+You transform your domain model objects into the (simple) jtwfg model objects using a jtwfg graph builder object:
 
 [source,java]
 ----
@@ -77,7 +79,7 @@ Graph graph = builder.build();
 
 ==== Step 2
 
-As soon as you have a jtwfg-Graph instance, you can use the jtwfg deadlock detector to find deadlocks.
+As soon as you have a jtwfg graph instance, you can use the jtwfg deadlock detector to find deadlocks:
 
 [source,java]
 ----
@@ -90,10 +92,10 @@ if(analyzisResult.hasDeadlock()){
 }
 ----
 
-=== Scenario 2: "Update the jtwfg model" as you update your domain model and check for deadlocks on the fly
+=== Scenario 2: "Update the jtwfg model" as you update your domain model objects and check for deadlocks on the fly
 
-Probably you want to keep the jtwfg model "in sync" with your domain model and check for deadlocks on the fly
-as soon as you update your model. Probably you use various threads to update your domain model and the jtwfg model.
+Probably you want to keep the jtwfg model objects "in sync" with your domain model objects and check for deadlocks on the fly
+as soon as you update your model objects. Probably you use various threads to update your domain model objects and the jtwfg model objects.
 
 That's fine.
 
@@ -102,8 +104,14 @@ this and more examples.
 
 === Thread-safety of jtwfg
 
-For simplicity and comfort GraphBuilder and DeadlockDetector are threadsafe. If you would like to use it
-single-threaded and have performance issues, let me know.
+For simplicity and comfort, the jtwfg 'GraphBuilder' and 'DeadlockDetector' classes are threadsafe.
+See the documentation in the source code for more information about thread-safety.
+
+If you would like to use jtwfg single-threaded and have performance issues, let me know.
+
+=== Limitations of jtwfg
+
+At the moment only simple, synchronous dependencies are supported by jtwfg.
 
 == Requirements
 
@@ -167,8 +175,8 @@ Please use GitHub issues and Pull Requests for support.
 
 == How to build the project
 
-If you cloned this git repository and would like to run a build on your machine, start the gradle based build using
-gradle's http://gradleware.com/registered-access?content=screencasts%2Fthe-gradle-wrapper%2F[gradlewrapper]:
+To run a build of the jtwfg project on your machine, clone the git repo to your local machine and start the gradle based build using
+gradle's http://gradleware.com/registered-access?content=screencasts%2Fthe-gradle-wrapper%2F[gradlewrapper] from the shell/command line:
 
 [source]
 ----
