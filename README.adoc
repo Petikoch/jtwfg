@@ -53,9 +53,9 @@ jtwfg can analyze such graphs and find the deadlock(s).
 
 For more details about deadlock detection algorithms see e.g. http://se.inf.ethz.ch/old/projects/daniel_moser/project_report_deadlock_detection.pdf[Daniel Moser's semester project].
 
-== Usage of jtwfg
+== Usage
 
-=== Basic scenario
+=== Usage scenario 1
 
 ==== Step 1
 
@@ -87,7 +87,7 @@ if(analyzisResult.hasDeadlock()){
 }
 ----
 
-=== Scenario 2: "Update the jtwfg model" as you update your domain model objects and check for deadlocks on the fly
+=== Usage scenario 2: "Update the jtwfg model" as you update your domain model objects and check for deadlocks on the fly
 
 Probably you want to keep the jtwfg model objects "in sync" with your domain model objects and check for deadlocks on the fly
 as soon as you update your model objects. Probably you use various threads to update your domain model objects and the jtwfg model objects.
@@ -106,7 +106,7 @@ If you would like to use jtwfg single-threaded and have performance issues, let 
 
 === Limitations of jtwfg
 
-At the moment only simple, synchronous dependencies are supported by jtwfg.
+At the moment jtwfg supports only simple, synchronous "waits for" dependencies.
 
 == Requirements
 
