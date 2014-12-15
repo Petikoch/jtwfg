@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+
 package ch.petikoch.libs.jtwfg
 
 import com.google.common.collect.Multimap
@@ -68,7 +70,7 @@ class Documentation extends Specification {
 
 		and: 'you see where the deadlock is'
 
-		analysisResult.deadlockCycles.getAt(0).getInvolvedTasks() == ['t1', 't2', 't3', 't1']
+		analysisResult.deadlockCycles.getAt(0).getCycleTasks() == ['t1', 't2', 't3', 't1']
 	}
 
 	def 'Use case 2: As you update your domain model, you update the jtwg model and check for deadlocks'() {
@@ -101,6 +103,7 @@ class Documentation extends Specification {
 		graphBuilder.addTaskWaitsFor('t2', 't3')
 		task2TaskDependencies.put('t3', 't2')
 		graphBuilder.addTaskWaitsFor('t3', 't2')
+		tasks.add('t4')
 
 		and: 'you immediately check for deadlocks again'
 
@@ -113,6 +116,10 @@ class Documentation extends Specification {
 		and: 'you see where the deadlock is'
 
 		analysisReport.deadlockCycles.size() == 1
-		analysisReport.deadlockCycles.getAt(0).getInvolvedTasks() == ['t2', 't3', 't2']
+		analysisReport.deadlockCycles.getAt(0).getCycleTasks() == ['t2', 't3', 't2']
+
+		and: 'you can also ask if a certain task is deadlocked'
+		analysisReport.isDeadlocked('t2')
+		!analysisReport.isDeadlocked('t4')
 	}
 }

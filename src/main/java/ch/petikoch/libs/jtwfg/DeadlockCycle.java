@@ -32,16 +32,75 @@ import java.util.*;
  */
 public class DeadlockCycle<T> {
 
-	private final List<T> involvedTasks;
+	private final List<T> cycleTasks;
+	private final Map<T, Set<T>> alsoDeadlockedTasks;
+	private final Set<T> allDeadlockedTasks;
 
-	DeadlockCycle(final List<T> involvedTasks) {
-		Preconditions.checkArgument(involvedTasks != null && !involvedTasks.isEmpty(), "There are no involved tasks: " + involvedTasks);
-		this.involvedTasks = Collections.unmodifiableList(involvedTasks);
+	DeadlockCycle(final List<T> cycleTasks, /* Nullable */ final Map<T, Set<T>> alsoDeadlockedTasks) {
+		Preconditions.checkArgument(cycleTasks != null && !cycleTasks.isEmpty(), "There are no cycle tasks: " + cycleTasks);
+		this.cycleTasks = Collections.unmodifiableList(cycleTasks);
+		if (null != alsoDeadlockedTasks) {
+			final LinkedHashMap<T, Set<T>> alsoDeadlockedTasksCopyMap = new LinkedHashMap<>(alsoDeadlockedTasks.size());
+			for (Map.Entry<T, Set<T>> mapEntry : alsoDeadlockedTasks.entrySet()) {
+				alsoDeadlockedTasksCopyMap.put(mapEntry.getKey(), Collections.unmodifiableSet(mapEntry.getValue()));
+			}
+			this.alsoDeadlockedTasks = Collections.unmodifiableMap(alsoDeadlockedTasksCopyMap);
+		} else {
+			this.alsoDeadlockedTasks = Collections.emptyMap();
+		}
+		Set<T> allInvolved = new LinkedHashSet<>(this.cycleTasks);
+		allInvolved.addAll(this.alsoDeadlockedTasks.keySet());
+		this.allDeadlockedTasks = Collections.unmodifiableSet(allInvolved);
 	}
 
+	/**
+	 * @return an unmodifiable list of the tasks which build the cycle
+	 */
 	@SuppressWarnings("UnusedDeclaration")
-	public List<T> getInvolvedTasks() {
-		return involvedTasks;
+	public List<T> getCycleTasks() {
+		return cycleTasks;
+	}
+
+	/**
+	 * @return an unmodifiable map of other tasks outside of the cycle, which are direct or indirect dependent on a task
+	 * of the cycle
+	 */
+	public Map<T, Set<T>> getAlsoDeadlockedTasks() {
+		return alsoDeadlockedTasks;
+	}
+
+	/**
+	 * @return an unmodifiable set of all deadlocked tasks because of this deadlock cycle
+	 */
+	public Set<T> getAllDeadlockedTasks() {
+		return allDeadlockedTasks;
+	}
+
+	/**
+	 * @param task
+	 * 		not null
+	 *
+	 * @return true if the given task is deadlocked because of this deadlock cycle
+	 */
+	public boolean isDeadlocked(T task) {
+		Preconditions.checkArgumentNotNull(task, "task must not be null");
+		return allDeadlockedTasks.contains(task);
+	}
+
+	/**
+	 * @param tasks
+	 * 		not null
+	 *
+	 * @return true if all the given tasks are deadlocked because of this deadlock cycle
+	 */
+	public boolean areAllDeadlocked(Iterable<T> tasks) {
+		Preconditions.checkArgumentNotNull(tasks, "tasks must not be null");
+		for (T task : tasks) {
+			if (!isDeadlocked(task)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -55,26 +114,25 @@ public class DeadlockCycle<T> {
 
 		final DeadlockCycle<T> that = (DeadlockCycle<T>) o;
 
-		if (involvedTasks.size() == that.involvedTasks.size()) {
-			if (involvedTasks.size() == 0) {
-				return true;
-			} else {
-				Set<T> thisTaskSet = new HashSet<>(involvedTasks);
-				Set<T> thatTaskSet = new HashSet<>(that.involvedTasks);
+		if (alsoDeadlockedTasks.equals(that.alsoDeadlockedTasks)) {
+			if (cycleTasks.size() == that.cycleTasks.size()) {
+
+				Set<T> thisTaskSet = new HashSet<>(cycleTasks);
+				Set<T> thatTaskSet = new HashSet<>(that.cycleTasks);
 				if (thisTaskSet.equals(thatTaskSet)) {
 					// the order is important
-					T firstElement = involvedTasks.iterator().next();
-					int indexOfFirstElementInThat = calculateIndex(that.involvedTasks, firstElement);
+					T firstElement = cycleTasks.iterator().next();
+					int indexOfFirstElementInThat = calculateIndex(that.cycleTasks, firstElement);
 					if (indexOfFirstElementInThat > 0) {
-						List<T> reorderedCopyOfThatInvolvedTasks = new ArrayList<>(that.involvedTasks.size());
-						reorderedCopyOfThatInvolvedTasks.addAll(that.involvedTasks.subList(indexOfFirstElementInThat, that.involvedTasks.size()));
+						List<T> reorderedCopyOfThatInvolvedTasks = new ArrayList<>(that.cycleTasks.size());
+						reorderedCopyOfThatInvolvedTasks.addAll(that.cycleTasks.subList(indexOfFirstElementInThat, that.cycleTasks.size()));
 						if (indexOfFirstElementInThat > 1) {
-							reorderedCopyOfThatInvolvedTasks.addAll(that.involvedTasks.subList(1, indexOfFirstElementInThat));
+							reorderedCopyOfThatInvolvedTasks.addAll(that.cycleTasks.subList(1, indexOfFirstElementInThat));
 						}
-						reorderedCopyOfThatInvolvedTasks.add(that.involvedTasks.get(indexOfFirstElementInThat));
-						return involvedTasks.equals(reorderedCopyOfThatInvolvedTasks);
+						reorderedCopyOfThatInvolvedTasks.add(that.cycleTasks.get(indexOfFirstElementInThat));
+						return cycleTasks.equals(reorderedCopyOfThatInvolvedTasks);
 					} else {
-						return involvedTasks.equals(that.involvedTasks);
+						return cycleTasks.equals(that.cycleTasks);
 					}
 				}
 			}
@@ -96,17 +154,30 @@ public class DeadlockCycle<T> {
 
 	@Override
 	public int hashCode() {
-		return involvedTasks.size();
+		return allDeadlockedTasks.hashCode();
 	}
 
 	@Override
 	public String toString() {
 		String result = DeadlockCycle.class.getSimpleName();
 		result += ": ";
-		for (int i = 0; i < involvedTasks.size() - 1; i++) {
-			result += involvedTasks.get(i) + " -> ";
+		for (int i = 0; i < cycleTasks.size() - 1; i++) {
+			result += cycleTasks.get(i) + " -> ";
 		}
-		result += involvedTasks.get(involvedTasks.size() - 1);
+		result += cycleTasks.get(cycleTasks.size() - 1);
+		if (!alsoDeadlockedTasks.isEmpty()) {
+			result += ". The following tasks are also deadlocked, because they are direct or indirect dependent on at least one of the tasks in the deadlock cycle: ";
+			for (Map.Entry<T, Set<T>> mapEntry : alsoDeadlockedTasks.entrySet()) {
+				for (T waitForTask : mapEntry.getValue()) {
+					result += mapEntry.getKey();
+					result += "->";
+					result += waitForTask;
+					result += " ";
+				}
+			}
+			result = result.trim();
+			result += ".";
+		}
 		return result;
 	}
 }

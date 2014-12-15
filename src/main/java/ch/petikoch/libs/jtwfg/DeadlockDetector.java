@@ -31,13 +31,64 @@ import java.util.*;
  */
 public class DeadlockDetector<T> {
 
-	public DeadlockAnalysisResult<T> analyze(Graph<T> graph) {
+	public DeadlockAnalysisResult<T> analyze(final Graph<T> graph) {
 		Set<DeadlockCycle<T>> cycleCollector = new LinkedHashSet<>();
+		findCycles(graph, cycleCollector);
+		Set<DeadlockCycle<T>> cyclesWithAlsoDeadlocked = findAlsoDeadlocked(graph, Collections.unmodifiableSet(cycleCollector));
+		return new DeadlockAnalysisResult<>(cyclesWithAlsoDeadlocked);
+	}
+
+	private void findCycles(Graph<T> graph,
+	                        Set<DeadlockCycle<T>> cycleCollector) {
 		Set<Task<T>> visitedTasks = new HashSet<>();
 		for (Task<T> startTask : graph.getTasks()) {
 			findDeadlocksDepthFirst(startTask, startTask.getWaitsForTasks(), new LinkedList<Task<T>>(), cycleCollector, visitedTasks);
 		}
-		return new DeadlockAnalysisResult<>(cycleCollector);
+	}
+
+	private Set<DeadlockCycle<T>> findAlsoDeadlocked(final Graph<T> graph,
+	                                                 final Set<DeadlockCycle<T>> deadlockCycles) {
+		Set<DeadlockCycle<T>> enrichedDeadlockCycles = deadlockCycles;
+		boolean moreDeadlockedFound = true;
+		while (moreDeadlockedFound) {
+			Set<DeadlockCycle<T>> againEnrichedDeadlockCycles = findSomeMoreDeadlocked(graph, Collections.unmodifiableSet(enrichedDeadlockCycles));
+			if (enrichedDeadlockCycles.equals(againEnrichedDeadlockCycles)) {
+				moreDeadlockedFound = false;
+			} else {
+				enrichedDeadlockCycles = againEnrichedDeadlockCycles;
+			}
+		}
+		return enrichedDeadlockCycles;
+	}
+
+	private Set<DeadlockCycle<T>> findSomeMoreDeadlocked(final Graph<T> graph,
+	                                                     final Set<DeadlockCycle<T>> originalDeadlockCycles) {
+		Set<DeadlockCycle<T>> enrichedDeadLockCyclesCollector = new LinkedHashSet<>();
+		for (DeadlockCycle<T> originalDeadlockCycle : originalDeadlockCycles) {
+			Map<T, Set<T>> enrichedAlsoDeadlocked = new LinkedHashMap<>(originalDeadlockCycle.getAlsoDeadlockedTasks());
+			for (Task<T> startTask : graph.getTasks()) {
+				for (Task<T> waitsForTask : startTask.getWaitsForTasks()) {
+					if (!originalDeadlockCycle.isDeadlocked(startTask.getId()) && originalDeadlockCycle.isDeadlocked(waitsForTask.getId())) {
+						if (!enrichedAlsoDeadlocked.containsKey(startTask.getId())) {
+							enrichedAlsoDeadlocked.put(startTask.getId(), new LinkedHashSet<T>());
+						}
+						Collection<T> values = enrichedAlsoDeadlocked.get(startTask.getId());
+						values.add(waitsForTask.getId());
+					}
+					for (Task<T> otherWaitsForTask : waitsForTask.getWaitsForTasks()) {
+						if (!originalDeadlockCycle.isDeadlocked(waitsForTask.getId()) && originalDeadlockCycle.isDeadlocked(otherWaitsForTask.getId())) {
+							if (!enrichedAlsoDeadlocked.containsKey(waitsForTask.getId())) {
+								enrichedAlsoDeadlocked.put(waitsForTask.getId(), new LinkedHashSet<T>());
+							}
+							Collection<T> values = enrichedAlsoDeadlocked.get(waitsForTask.getId());
+							values.add(otherWaitsForTask.getId());
+						}
+					}
+				}
+			}
+			enrichedDeadLockCyclesCollector.add(new DeadlockCycle<>(originalDeadlockCycle.getCycleTasks(), enrichedAlsoDeadlocked));
+		}
+		return enrichedDeadLockCyclesCollector;
 	}
 
 	private static <T> void findDeadlocksDepthFirst(Task<T> startTask,
@@ -59,7 +110,7 @@ public class DeadlockDetector<T> {
 						cycleList.addAll(hopsCopy);
 						cycleList.add(otherOfOtherTask);
 						final List<T> cycleIdList = convert(cycleList);
-						cycleCollector.add(new DeadlockCycle<>(cycleIdList));
+						cycleCollector.add(new DeadlockCycle<>(cycleIdList, null /* is populated afterwards */));
 					} else {
 						findDeadlocksDepthFirst(startTask, otherTask.getWaitsForTasks(), hopsCopy, cycleCollector, visitedTasks);
 					}
