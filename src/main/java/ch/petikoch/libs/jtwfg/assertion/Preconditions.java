@@ -32,4 +32,19 @@ public class Preconditions {
 			throw new IllegalArgumentException(message);
 		}
 	}
+
+	/**
+	 * @param condition
+	 * 		a condition which must be fulfilled
+	 * @param message
+	 * 		or null
+	 *
+	 * @throws IllegalArgumentException
+	 * 		in case of condition is false
+	 */
+	public static void checkArgument(boolean condition, String message) {
+		if (!condition) {
+			throw new IllegalArgumentException(message);
+		}
+	}
 }

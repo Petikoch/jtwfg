@@ -26,7 +26,6 @@ class DeadlockCycleTest extends Specification {
 
 		where:
 		deadLockCycle1                                      | deadLockCycle2                                      | result
-		new DeadlockCycle<>([])                             | new DeadlockCycle<>([])                             | true
 		new DeadlockCycle<>(['t1', 't1'])                   | new DeadlockCycle<>(['t1', 't1'])                   | true
 		new DeadlockCycle<>(['t1', 't2', 't1'])             | new DeadlockCycle<>(['t1', 't2', 't1'])             | true
 		new DeadlockCycle<>(['t1', 't2', 't1'])             | new DeadlockCycle<>(['t2', 't1', 't2'])             | true
@@ -35,7 +34,6 @@ class DeadlockCycleTest extends Specification {
 		new DeadlockCycle<>(['t1', 't2', 't3', 't4', 't1']) | new DeadlockCycle<>(['t3', 't4', 't1', 't2', 't3']) | true
 
 		new DeadlockCycle<>(['t1', 't2', 't3', 't4', 't1']) | new DeadlockCycle<>(['t1', 't3', 't2', 't4', 't1']) | false
-		new DeadlockCycle<>([])                             | new DeadlockCycle<>(['t1'])                         | false
 		new DeadlockCycle<>(['t1', 't2', 't1'])             | new DeadlockCycle<>(['t1', 't42', 't1'])            | false
 	}
 
@@ -54,6 +52,17 @@ class DeadlockCycleTest extends Specification {
 
 		then:
 		isNotEqual
+	}
+
+	def 'toString: nice String representation'() {
+		expect:
+		deadLockCycle.toString() == result
+
+		where:
+		deadLockCycle                                       | result
+		new DeadlockCycle<>(['t1', 't1'])                   | 'DeadlockCycle: t1 -> t1'
+		new DeadlockCycle<>(['t1', 't2', 't1'])             | 'DeadlockCycle: t1 -> t2 -> t1'
+		new DeadlockCycle<>(['t1', 't2', 't3', 't4', 't1']) | 'DeadlockCycle: t1 -> t2 -> t3 -> t4 -> t1'
 	}
 }
 
