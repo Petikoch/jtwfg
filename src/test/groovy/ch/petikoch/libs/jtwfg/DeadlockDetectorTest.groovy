@@ -86,6 +86,31 @@ class DeadlockDetectorTest extends Specification {
 		result.deadlockCycles.getAt(0) == new DeadlockCycle<>(['t1', 't2', 't3', 't1'], null)
 	}
 
+	def 'findDeadlock: 2 distinct triangle cycles'() {
+		given: "triangle cycle 1"
+		graphBuilder.addTaskWaitsFor('t1', 't2')
+		graphBuilder.addTaskWaitsFor('t2', 't3')
+		graphBuilder.addTaskWaitsFor('t3', 't1')
+
+		and: "triangle cycle 2"
+		graphBuilder.addTaskWaitsFor('t11', 't12')
+		graphBuilder.addTaskWaitsFor('t12', 't13')
+		graphBuilder.addTaskWaitsFor('t13', 't11')
+
+		and:
+		def graph = graphBuilder.build()
+
+		when:
+		def result = testee.analyze(graph)
+
+		then:
+		result != null
+		result.hasDeadlock()
+		result.deadlockCycles.size() == 2
+		result.deadlockCycles.getAt(0) == new DeadlockCycle<>(['t1', 't2', 't3', 't1'], null)
+		result.deadlockCycles.getAt(1) == new DeadlockCycle<>(['t11', 't12', 't13', 't11'], null)
+	}
+
 	def 'findDeadlock: square cycle'() {
 		given:
 		graphBuilder.addTaskWaitsFor('t1', 't2')
