@@ -16,6 +16,8 @@
 
 
 
+
+
 package ch.petikoch.libs.jtwfg
 
 import com.google.common.collect.Multimap
@@ -25,31 +27,31 @@ import com.google.common.collect.TreeMultimap
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessBoolean")
-class Documentation extends Specification {
+class ExecutableDocumentation extends Specification {
 
 	def 'Use case 1: Check for deadlocks at a specific moment in time'() {
 
 		given: 'Your own domain model with some kind of tasks and dependencies between them'
 
-		Set<String> tasks = Sets.newTreeSet()
-		tasks.add('t1')
-		tasks.add('t2')
-		tasks.add('t3')
-		tasks.add('t4')
-		tasks.add('t5')
+		Set<String> yourModelTasks = Sets.newTreeSet()
+		yourModelTasks.add('t1')
+		yourModelTasks.add('t2')
+		yourModelTasks.add('t3')
+		yourModelTasks.add('t4')
+		yourModelTasks.add('t5')
 
-		Multimap<String, String> task2TaskDependencies = TreeMultimap.create()
-		task2TaskDependencies.put('t1', 't2')
-		task2TaskDependencies.put('t2', 't3')
-		task2TaskDependencies.put('t3', 't1')
+		Multimap<String, String> yourModelTask2TaskDependencies = TreeMultimap.create()
+		yourModelTask2TaskDependencies.put('t1', 't2')
+		yourModelTask2TaskDependencies.put('t2', 't3')
+		yourModelTask2TaskDependencies.put('t3', 't1')
 
 		when: 'you want to know if you have a deadlock in it, you transform your model into the jtwfg model using the GraphBuilder'
 
 		def graphBuilder = new GraphBuilder<String>()
-		for (String myTaskIdFromMyDomainModel : tasks) {
+		for (String myTaskIdFromMyDomainModel : yourModelTasks) {
 			graphBuilder.addTask(myTaskIdFromMyDomainModel)
-			if (task2TaskDependencies.containsKey(myTaskIdFromMyDomainModel)) {
-				task2TaskDependencies.get(myTaskIdFromMyDomainModel).each { String waitForTaskId ->
+			if (yourModelTask2TaskDependencies.containsKey(myTaskIdFromMyDomainModel)) {
+				yourModelTask2TaskDependencies.get(myTaskIdFromMyDomainModel).each { String waitForTaskId ->
 					graphBuilder.addTaskWaitsFor(myTaskIdFromMyDomainModel, waitForTaskId)
 				}
 			}
@@ -59,7 +61,7 @@ class Documentation extends Specification {
 
 		def jtwfgGraph = graphBuilder.build()
 
-		and: 'run a deadlock analysis using the deadlock detector'
+		and: 'run a deadlock analysis using the jtwfg deadlock detector'
 
 		def analysisResult = new DeadlockDetector().analyze(jtwfgGraph)
 
@@ -77,37 +79,37 @@ class Documentation extends Specification {
 
 		given: 'Your own domain model with some kind of tasks and dependencies between them'
 
-		Set<String> tasks = Sets.newTreeSet().asSynchronized()
-		Multimap<String, String> task2TaskDependencies = Multimaps.synchronizedSortedSetMultimap(TreeMultimap.create())
+		Set<String> yourModelTasks = Sets.newTreeSet().asSynchronized()
+		Multimap<String, String> yourModelTask2TaskDependencies = Multimaps.synchronizedSortedSetMultimap(TreeMultimap.create())
 
 		and: 'the jtwfg GraphBuilder with a DeadlockDetector'
 
-		def graphBuilder = new GraphBuilder<String>()
-		def deadlockDetector = new DeadlockDetector<String>()
+		def jtwfgGraphBuilder = new GraphBuilder<String>()
+		def jtwfgDeadlockDetector = new DeadlockDetector<String>()
 
 		when: 'you add a task into your model, you add it also into the jtwfg model (might be a separate thread)'
 
-		tasks.add('t1')
-		graphBuilder.addTask('t1')
+		yourModelTasks.add('t1')
+		jtwfgGraphBuilder.addTask('t1')
 
 		then: 'you immediately check for deadlocks'
-		deadlockDetector.analyze(graphBuilder.build()).hasDeadlock() == false
+		jtwfgDeadlockDetector.analyze(jtwfgGraphBuilder.build()).hasDeadlock() == false
 
 		when: 'you add more tasks, you update your model and the jtwfg model (might be a separate thread)'
 
-		tasks.add('t2')
-		graphBuilder.addTask('t2')
-		tasks.add('t3')
-		graphBuilder.addTask('t3')
-		task2TaskDependencies.put('t2', 't3')
-		graphBuilder.addTaskWaitsFor('t2', 't3')
-		task2TaskDependencies.put('t3', 't2')
-		graphBuilder.addTaskWaitsFor('t3', 't2')
-		tasks.add('t4')
+		yourModelTasks.add('t2')
+		jtwfgGraphBuilder.addTask('t2')
+		yourModelTasks.add('t3')
+		jtwfgGraphBuilder.addTask('t3')
+		yourModelTask2TaskDependencies.put('t2', 't3')
+		jtwfgGraphBuilder.addTaskWaitsFor('t2', 't3')
+		yourModelTask2TaskDependencies.put('t3', 't2')
+		jtwfgGraphBuilder.addTaskWaitsFor('t3', 't2')
+		yourModelTasks.add('t4')
 
 		and: 'you immediately check for deadlocks again'
 
-		def analysisReport = deadlockDetector.analyze(graphBuilder.build())
+		def analysisReport = jtwfgDeadlockDetector.analyze(jtwfgGraphBuilder.build())
 
 		then: 'you see if you have a deadlock'
 
