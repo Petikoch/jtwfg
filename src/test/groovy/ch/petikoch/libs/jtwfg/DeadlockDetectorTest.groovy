@@ -111,6 +111,30 @@ class DeadlockDetectorTest extends Specification {
 		result.deadlockCycles.getAt(1) == new DeadlockCycle<>(['t11', 't12', 't13', 't11'], null)
 	}
 
+	def 'findDeadlock: 2 overlapping triangle cycles are considered as one cycle with additional deadlocked tasks'() {
+		given: "triangle cycle 1"
+		graphBuilder.addTaskWaitsFor('t1', 't2')
+		graphBuilder.addTaskWaitsFor('t2', 't3')
+		graphBuilder.addTaskWaitsFor('t3', 't1')
+
+		and: "triangle cycle 2"
+		graphBuilder.addTaskWaitsFor('t4', 't2')
+		graphBuilder.addTaskWaitsFor('t5', 't4')
+		graphBuilder.addTaskWaitsFor('t2', 't5')
+
+		and:
+		def graph = graphBuilder.build()
+
+		when:
+		def result = testee.analyze(graph)
+
+		then:
+		result != null
+		result.hasDeadlock()
+		result.deadlockCycles.size() == 1
+		result.deadlockCycles.getAt(0) == new DeadlockCycle<>(['t1', 't2', 't3', 't1'], ['t4': ['t2'] as Set, 't5': ['t4'] as Set])
+	}
+
 	def 'findDeadlock: square cycle'() {
 		given:
 		graphBuilder.addTaskWaitsFor('t1', 't2')
