@@ -17,7 +17,9 @@ image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintr
 
 The typical use case for someone is having some kind of own "execution engine" implementation
 (local, distributed, grid...) with some kind of tasks in it, with optionally dependencies between the tasks.
-Someone wants to be able to *easily detect deadlocks* at runtime in his/her engine.
+Someone wants to be able to *easily detect deadlocks* in his/her engine.
+
+Of course, jtwfg also works for any other kind of "find circular dependencies problems", not only deadlocks.
 
 jtwfg implements a *task wait for graph* model with a *deadlock detection algorithm*.
 
@@ -55,7 +57,7 @@ jtwfg can analyze such graphs and tell you
 
 === Other use cases
 
-Beside of the mentioned classic "custom execution engine" deadlock use case, jtwfg can also be used to find any kind of circular dependencies in sectors like configuration, dependency injection, ...
+Beside of the mentioned classic "custom execution engine" deadlock use case, jtwfg can also be used to find any kind of circular dependencies in problem areas like configuration, dependency injection, ...
 
 === More about the deadlock detection topic in general
 
