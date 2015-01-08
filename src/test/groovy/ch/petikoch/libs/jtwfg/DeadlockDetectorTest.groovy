@@ -22,9 +22,6 @@ class DeadlockDetectorTest extends Specification {
 	def graphBuilder = new GraphBuilder<String>()
 	def testee = new DeadlockDetector<String>()
 
-	//TODO Test thread-safety
-	//TODO Check coverage
-
 	def 'findDeadlock: Simple direct cycle'() {
 		given:
 		graphBuilder.addTaskWaitsFor('t1', 't2')
