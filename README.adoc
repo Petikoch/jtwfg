@@ -47,7 +47,15 @@ Same for "Task 6" and "Task 7", also _deadlocked_.
 
 "Task 5" is fine.
 
-jtwfg can analyze such graphs and find the deadlock(s).
+jtwfg can analyze such graphs and tell you
+
+* If there is a deadlock in the graph
+* How many deadlock circles exist and which tasks are in them
+* What other tasks (outside of a deadlock circle) are also deadlocked
+
+=== Other use cases
+
+Beside of the mentioned classic "custom execution engine" deadlock use case, jtwfg can also be used to find any kind of circular dependencies in sectors like configuration, dependency injection, ...
 
 === More about the deadlock detection topic in general
 
