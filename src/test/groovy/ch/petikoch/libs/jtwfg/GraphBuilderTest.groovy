@@ -17,6 +17,9 @@ package ch.petikoch.libs.jtwfg
 
 import spock.lang.Specification
 
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+
 class GraphBuilderTest extends Specification {
 
 	def testee = new GraphBuilder()
@@ -281,5 +284,86 @@ class GraphBuilderTest extends Specification {
 		graph.getTasks().getAt(0).getWaitsForTasks().getAt(0).getId() == taskId3
 		graph.getTasks().getAt(1).getWaitsForTasks().size() == 1
 		graph.getTasks().getAt(1).getWaitsForTasks().getAt(0).getId() == taskId3
+	}
+
+	def 'concurrency: the graph can be built using multiple threads'() {
+		given:
+		def numberOfCpuCores = Runtime.getRuntime().availableProcessors()
+		def numberOfThreads = numberOfCpuCores * 8
+		def numberOfTasksPerThread = 100
+		def totalNumberOfTasksOverall = numberOfThreads * numberOfTasksPerThread
+
+		and:
+		def expectedTaskIdsInGraph = [] as Set
+		numberOfThreads.times { int threadNumber ->
+			numberOfTasksPerThread.times { int taskPerThreadNumber ->
+				def taskId = "task ${taskPerThreadNumber} of thread ${threadNumber}".toString()
+				expectedTaskIdsInGraph.add(taskId)
+			}
+		}
+		assert expectedTaskIdsInGraph.size() == totalNumberOfTasksOverall
+
+		and:
+		def threadCanStartCountDownLatch = new CountDownLatch(numberOfThreads)
+		def allThreadsDoneCountDownLatch = new CountDownLatch(numberOfThreads)
+
+		when:
+		numberOfThreads.times { int threadNumber ->
+			Thread.startDaemon(GraphBuilderTest.class.simpleName + '-thread-' + threadNumber) {
+				threadCanStartCountDownLatch.countDown()
+				threadCanStartCountDownLatch.await(1, TimeUnit.MINUTES)
+
+				numberOfTasksPerThread.times { int taskPerThreadNumber ->
+					def taskId = "task ${taskPerThreadNumber} of thread ${threadNumber}".toString()
+					testee.addTask(taskId)
+				}
+
+				println Thread.currentThread().getName() + ' added ' + numberOfTasksPerThread + 'tasks'
+
+				allThreadsDoneCountDownLatch.countDown()
+			}
+		}
+		allThreadsDoneCountDownLatch.await(1, TimeUnit.MINUTES)
+		def graph = testee.build()
+
+		then:
+		graph != null
+		graph.getTasks().size() == totalNumberOfTasksOverall
+		graph.getTasks().collect { it.getId() }.toSet() == expectedTaskIdsInGraph
+	}
+
+	def 'concurrency: a consistent snapshot of the graph can be built anytime, especially while other threads are adding tasks'() {
+		given:
+		def numberOfCpuCores = Runtime.getRuntime().availableProcessors()
+		def numberOfOtherThreads = numberOfCpuCores * 8
+		def numberOfTasksPerOtherThread = 100
+		def numberOfTasksOfMainThread = numberOfTasksPerOtherThread
+
+		and:
+		def threadCanStartCountDownLatch = new CountDownLatch(numberOfOtherThreads)
+
+		when:
+		numberOfOtherThreads.times { int threadNumber ->
+			Thread.startDaemon(GraphBuilderTest.class.simpleName + '-thread-' + threadNumber) {
+				threadCanStartCountDownLatch.countDown()
+				threadCanStartCountDownLatch.await(1, TimeUnit.MINUTES)
+
+				numberOfTasksPerOtherThread.times { int taskPerThreadNumber ->
+					def taskId = "task ${taskPerThreadNumber} of thread ${threadNumber}".toString()
+					testee.addTask(taskId)
+				}
+			}
+		}
+		threadCanStartCountDownLatch.await(1, TimeUnit.MINUTES)
+		List<String> mainThreadTaskIds = []
+		numberOfTasksOfMainThread.times {
+			mainThreadTaskIds.add('task ' + it + ' of main thread')
+		}
+		testee.addTasks(mainThreadTaskIds)
+		def graph = testee.build()
+
+		then:
+		graph != null
+		graph.getTasks().collect { it.getId() }.toSet().containsAll(mainThreadTaskIds)
 	}
 }
