@@ -249,4 +249,43 @@ class DeadlockDetectorTest extends Specification {
 		result.deadlockCycles.getAt(0).areAllDeadlocked(['t1', 't2', 't3', 't4', 't6', 't7'])
 		!result.deadlockCycles.getAt(0).isDeadlocked('t5')
 	}
+
+	def 'findDeadlock: many tasks no locking dependencies'() {
+		given:
+		def numberOfTasks = 100000
+		(1..numberOfTasks).each { int it ->
+			graphBuilder.addTask("t${it}".toString())
+		}
+		def graph = graphBuilder.build()
+
+		when:
+		def result = testee.analyze(graph)
+
+		then:
+		result != null
+		!result.hasDeadlock()
+		result.deadlockCycles.size() == 0
+	}
+
+	def 'findDeadlock: many tasks with one simple deadlock'() {
+		given:
+		def numberOfTasks = 100000
+		(1..numberOfTasks).each { int it ->
+			graphBuilder.addTask("t${it}".toString())
+		}
+		def deadLockedTask1 = 't_deadlocked1'
+		def deadLockedTask2 = 't_deadlocked2'
+		graphBuilder.addTaskWaitsFor(deadLockedTask1, deadLockedTask2)
+		graphBuilder.addTaskWaitsFor(deadLockedTask2, deadLockedTask1)
+		def graph = graphBuilder.build()
+
+		when:
+		def result = testee.analyze(graph)
+
+		then:
+		result != null
+		result.hasDeadlock()
+		result.deadlockCycles.size() == 1
+		result.deadlockCycles.getAt(0) == new DeadlockCycle<>([deadLockedTask1, deadLockedTask2, deadLockedTask1], null)
+	}
 }
