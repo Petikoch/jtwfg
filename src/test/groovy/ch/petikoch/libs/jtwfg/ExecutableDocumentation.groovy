@@ -19,6 +19,9 @@ import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
 import com.google.common.collect.Sets
 import com.google.common.collect.TreeMultimap
+import groovy.transform.CompileStatic
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.Sortable
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessBoolean")
@@ -118,5 +121,34 @@ class ExecutableDocumentation extends Specification {
 		and: 'you can also ask if a certain task is deadlocked'
 		analysisReport.isDeadlocked('t2')
 		!analysisReport.isDeadlocked('t4')
+	}
+
+	def 'Custom types for task IDs in the graph: You can use standard types like String, Integer, ... or you can use you own custom types from e.g. your domain model'() {
+		given:
+		def jtwfgGraphBuilder = new GraphBuilder<CustomTaskId>()
+
+		when:
+		jtwfgGraphBuilder.addTask(new CustomTaskId('123'))
+		jtwfgGraphBuilder.addTask(new CustomTaskId('456'))
+		Graph<CustomTaskId> customTaskIdGraph = jtwfgGraphBuilder.build()
+
+		then:
+		customTaskIdGraph.getTasks().size() == 2
+		customTaskIdGraph.getTasks().getAt(0).getId() == new CustomTaskId('123')
+		customTaskIdGraph.getTasks().getAt(1).getId() == new CustomTaskId('456')
+	}
+
+	@CompileStatic
+	// Groovy's Sortable = Java's Comparable: MAY
+	@Sortable
+	// MUST! Custom task id types must have a reasonable implementation of hashCode and equals
+	@EqualsAndHashCode
+	private static class CustomTaskId {
+
+		final String internalId
+
+		CustomTaskId(final String internalId) {
+			this.internalId = internalId
+		}
 	}
 }
