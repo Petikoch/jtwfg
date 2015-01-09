@@ -44,7 +44,7 @@ The situation in the second example is a bit more interesting.
 image::many_tasks_deadlocked.png[]
 
 Here, we have a circle consisting of "Task 1", "Task 2" and "Task 3". Since they are all waiting synchronously for each other *forever*, they are _deadlocked_.
-"Task 4" is also _deadlocked_, although it is not in the circle. It's is waiting for a _deadlocked_ task.
+"Task 4" is also _deadlocked_, although it is not in the circle. It is waiting for a _deadlocked_ task.
 Same for "Task 6" and "Task 7", also _deadlocked_.
 
 "Task 5" is fine.
