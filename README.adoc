@@ -195,6 +195,9 @@ gradle's http://gradleware.com/registered-access?content=screencasts%2Fthe-gradl
 Since I didn't found a "small" and "standalone" library for custom engine deadlock detection on the JVM, I wrote my own.
 If you know about a solution, thanks for notifying me.
 
+Update January 2015: I found https://github.com/jgrapht/jgrapht[JGraphT] and compared it with jtwfg in this little https://github.com/Petikoch/jgrapht_cycledetection_example[example project].
+And puuuhhh... there are good reasons for the further existence of *jtwfg*! ;-)
+
 === Motivation 2
 
 I wanted to try the common open source platforms and tools like Github, Bintray, Travis-CI, Coveralls... and what's better
