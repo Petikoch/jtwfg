@@ -116,7 +116,8 @@ If you would like to use jtwfg single-threaded and have performance issues, let 
 
 === Limitations of jtwfg
 
-At the moment jtwfg supports only simple, synchronous "waits for" dependencies.
+* At the moment jtwfg supports only simple, synchronous "waits for" dependencies.
+* The algorithms are not yet tuned and work more or less in a "brute force" manner. Please create a github issue if you have zillions of tasks and run into performance / memory issues.
 
 == Requirements
 
@@ -176,7 +177,7 @@ See https://github.com/Petikoch/jtwfg/releases.
 
 == Support
 
-Please use GitHub issues and Pull Requests for support.
+Please use GitHub issues and pull requests for support.
 
 == How to build the project
 
