@@ -62,24 +62,34 @@ class TaskTest extends Specification {
 		result == 1
 	}
 
-	def 'compareTo: returns 0 on types not implementing comparable'() {
+	def 'compareTo: behaviour on types not implementing comparable consistent to equals'() {
 		given:
 		def taskId1 = new CustomTaskId('t1')
+		def equalTaskId1 = new CustomTaskId('t1')
 		def taskId2 = new CustomTaskId('t2')
 		def task1 = new Task<CustomTaskId>(taskId1)
+		def equalTask1 = new Task<CustomTaskId>(equalTaskId1)
 		def task2 = new Task<CustomTaskId>(taskId2)
 
 		when:
-		def result = task1.compareTo(task2)
-
+		def result = task1.compareTo(equalTask1)
 		then:
 		result == 0
 
 		when:
-		result = task2.compareTo(task1)
-
+		result = equalTask1.compareTo(task1)
 		then:
 		result == 0
+
+		when:
+		result = task1.compareTo(task2)
+		then:
+		result == -1
+
+		when:
+		result = task2.compareTo(task1)
+		then:
+		result == -1
 	}
 
 	@CompileStatic

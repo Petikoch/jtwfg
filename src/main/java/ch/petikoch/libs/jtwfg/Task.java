@@ -95,10 +95,16 @@ public class Task<T> implements Comparable<Task<T>> {
 
 	@Override
 	public int compareTo(final Task<T> other) {
-		if (this.getId() instanceof Comparable && other.getId() instanceof Comparable) {
+		if ((this.getId() instanceof Comparable) &&
+				(other.getId() instanceof Comparable) &&
+				(this.getId().getClass().isAssignableFrom(other.getId().getClass()))) {
 			//noinspection unchecked
 			return ((Comparable) this.getId()).compareTo(other.getId());
 		}
-		return 0;
+		if (this.equals(other)) {
+			return 0; // "consistent" to equals
+		} else {
+			return -1; // "consistent" to equals
+		}
 	}
 }
