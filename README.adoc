@@ -59,6 +59,10 @@ jtwfg can analyze such graphs and tell you
 
 Beside of the mentioned classic "custom execution engine" deadlock use case, jtwfg can also be used to find any kind of circular dependencies in problem areas like configuration, dependency injection, ...
 
+=== What about a "task resource assignment graph" model?
+
+Check out https://github.com/Petikoch/jtrag[jtrag].
+
 === More about the deadlock detection topic in general
 
 For more details about deadlock detection algorithms see e.g. http://se.inf.ethz.ch/old/projects/daniel_moser/project_report_deadlock_detection.pdf[Daniel Moser's semester project].
