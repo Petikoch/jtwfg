@@ -173,7 +173,7 @@ https://bintray.com/bintray/jcenter page for instructions to set it up.
 
 ==== Just the jar
 
-The jar of each released version is located here image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintray.com/{bintray-user}/maven/{project-name}/_latestVersion"]
+The jar of the latest version is located here image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://bintray.com/{bintray-user}/maven/{project-name}/_latestVersion"]
 
 == Release notes
 
