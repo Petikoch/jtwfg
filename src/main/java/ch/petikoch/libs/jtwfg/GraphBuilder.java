@@ -18,7 +18,10 @@ package ch.petikoch.libs.jtwfg;
 
 import ch.petikoch.libs.jtwfg.assertion.Preconditions;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * A builder class for graph instance creation. Can be used concurrently by different threads which create together the
@@ -219,7 +222,7 @@ public class GraphBuilder<T> {
 	}
 
 	private static <T> TreeSet<Task<T>> copy(final Collection<Task<T>> originalTasks) {
-		Map<Task<T>, Task<T>> result = new HashMap<>(originalTasks.size());
+		Map<Task<T>, Task<T>> result = new LinkedHashMap<>(originalTasks.size());
 		recursiveCopy(originalTasks, result);
 		return new TreeSet<>(result.values());
 	}
