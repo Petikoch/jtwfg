@@ -40,8 +40,8 @@ public class DeadlockDetector<T> {
 
 	private void findCycles(Graph<T> graph,
 	                        Set<DeadlockCycle<T>> cycleCollector) {
-		Set<Task<T>> visitedTasks = new HashSet<>();
 		for (Task<T> startTask : graph.getTasks()) {
+			Set<Task<T>> visitedTasks = new HashSet<>();
 			findDeadlocksDepthFirst(startTask, startTask.getWaitsForTasks(), new LinkedList<Task<T>>(), cycleCollector, visitedTasks);
 		}
 	}
