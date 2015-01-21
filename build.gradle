@@ -1,5 +1,5 @@
 plugins {
-    id "com.jfrog.bintray" version "1.0"            // https://github.com/bintray/gradle-bintray-plugin
+    id "com.jfrog.bintray" version '1.0'            // https://github.com/bintray/gradle-bintray-plugin
     id 'nu.studer.credentials' version '1.0.1'      // https://github.com/etiennestuder/gradle-credentials-plugin
     id 'com.github.kt3k.coveralls' version '2.0.1'  // https://github.com/kt3k/coveralls-gradle-plugin
 }
@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.3.8', classifier: 'indy'
+    testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.0', classifier: 'indy'
     testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
         exclude group: 'org.codehaus.groovy'
     }
