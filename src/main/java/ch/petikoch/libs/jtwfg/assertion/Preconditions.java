@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2015 Peti Koch und Adrian Elsener
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
