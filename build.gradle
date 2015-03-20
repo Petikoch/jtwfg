@@ -25,8 +25,8 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.0', classifier: 'indy'
-    testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
+    testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.2', classifier: 'indy'
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
     }
     testCompile 'com.google.guava:guava:18.0' // provides e.g. nice Multimap
