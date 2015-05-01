@@ -201,7 +201,9 @@ Since I didn't found a "small" and "standalone" library for custom engine deadlo
 If you know about a solution, thanks for notifying me.
 
 Update January 2015: I found https://github.com/jgrapht/jgrapht[JGraphT] and compared it with jtwfg in this little https://github.com/Petikoch/jgrapht_cycledetection_example[example project].
-And puuuhhh... there are good reasons for the further existence of *jtwfg*! ;-)
+
+Update April 2015: For deadlock prevention in the `java.util.concurrent.locks` Domain, I found the CycleDetectingLockFactory class in Google's excellent https://github.com/google/guava[Guava] library.
+Read a comparison https://github.com/Petikoch/guava_cycledetection_example[here].
 
 === Motivation 2
 
