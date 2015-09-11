@@ -15,7 +15,7 @@ apply plugin: 'jacoco'
 version = '1.0.4-SNAPSHOT'
 
 ext.artifactGroupId = 'ch.petikoch.libs'
-ext.description = 'A little java 7+ standalone library using a "task wait for graph" model to detect deadlocks'
+ext.description = 'A small java 7+ standalone library using a "task wait for graph" model to detect deadlocks'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
