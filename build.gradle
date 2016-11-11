@@ -12,7 +12,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'jacoco'
 apply plugin: 'signing'
 
-version = '1.0.5-SNAPSHOT'
+version = '1.0.4-SNAPSHOT'
 
 ext.artifactGroupId = 'ch.petikoch.libs'
 ext.description = 'A small java 7+ standalone library using a "task wait for graph" model to detect deadlocks'
