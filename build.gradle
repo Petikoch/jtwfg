@@ -1,5 +1,5 @@
 plugins {
-    id "com.jfrog.bintray" version '1.7.2'          // https://github.com/bintray/gradle-bintray-plugin
+    id "com.jfrog.bintray" version '1.6'          // https://github.com/bintray/gradle-bintray-plugin
     id 'nu.studer.credentials' version '1.0.3'      // https://github.com/etiennestuder/gradle-credentials-plugin
     id 'com.github.kt3k.coveralls' version '2.6.3'  // https://github.com/kt3k/coveralls-gradle-plugin
     id 'com.github.hierynomus.license' version '0.11.0'  // https://github.com/hierynomus/license-gradle-plugin
@@ -9,18 +9,21 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
-// "incubating"
 apply plugin: 'jacoco'
+apply plugin: 'signing'
 
-version = '1.0.4-SNAPSHOT'
+version = '1.0.4'
 
 ext.artifactGroupId = 'ch.petikoch.libs'
 ext.description = 'A small java 7+ standalone library using a "task wait for graph" model to detect deadlocks'
+ext.fileEncoding = 'UTF-8'
+ext.pomFile = file("${project.buildDir}/generated-pom.xml")
+ext."signing.keyId" = credentials.signingKeyId
+ext."signing.password" = credentials.signingPassword
+ext."signing.secretKeyRingFile" = credentials.signingSecretKeyRingFile
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-
-ext.fileEncoding = 'UTF-8'
 
 repositories {
     jcenter()
@@ -61,6 +64,10 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 artifacts {
     archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
 }
 
 tasks.withType(GroovyCompile) {
@@ -143,13 +150,37 @@ publishing {
             artifact sourceJar {
                 classifier "sources"
             }
+
+            //https://github.com/trustin/sphinx-gradle-plugin/blob/master/build.gradle
+            // Sign the pom.xml
+            pom.withXml {
+                writeTo(project.ext.pomFile)
+                def pomAscFile = signing.sign(project.ext.pomFile).signatureFiles[0]
+                artifact(pomAscFile) {
+                    classifier = null
+                    extension = 'pom.asc'
+                }
+                //project.ext.pomFile.delete()
+            }
+            // Sign the artifacts.
+            project.tasks.signArchives.signatureFiles.each {
+                artifact(it) {
+                    def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
+                    if (matcher.find()) {
+                        classifier = matcher.group(1)
+                    } else {
+                        classifier = null
+                    }
+                    extension = 'jar.asc'
+                }
+            }
         }
     }
 }
 
 model {
     tasks.generatePomFileForMavenCustomPublication {
-        destination = file("$buildDir/generated_pom.xml")
+        destination = project.ext.pomFile
     }
 }
 
