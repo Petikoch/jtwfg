@@ -161,7 +161,7 @@ Add jtwfg as dependency to your pom.xml:
         <dependency>
             <groupId>ch.petikoch.libs</groupId>
             <artifactId>jtwfg</artifactId>
-            <version>1.0.0</version> <!-- or whatever version -->
+            <version>1.0.4</version> <!-- or whatever version -->
             <!-- or latest release (not snapshot), for the braves
             <version>RELEASE</version>
             -->
