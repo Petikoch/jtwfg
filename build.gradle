@@ -1,5 +1,5 @@
 plugins {
-    id "com.jfrog.bintray" version '1.7.2'          // https://github.com/bintray/gradle-bintray-plugin
+    id "com.jfrog.bintray" version '1.6'          // https://github.com/bintray/gradle-bintray-plugin
     id 'nu.studer.credentials' version '1.0.3'      // https://github.com/etiennestuder/gradle-credentials-plugin
     id 'com.github.kt3k.coveralls' version '2.6.3'  // https://github.com/kt3k/coveralls-gradle-plugin
     id 'com.github.hierynomus.license' version '0.11.0'  // https://github.com/hierynomus/license-gradle-plugin
@@ -9,10 +9,9 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
-// "incubating"
 apply plugin: 'jacoco'
 
-version = '1.0.4-SNAPSHOT'
+version = '1.0.4'
 
 ext.artifactGroupId = 'ch.petikoch.libs'
 ext.description = 'A small java 7+ standalone library using a "task wait for graph" model to detect deadlocks'
