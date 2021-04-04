@@ -3,5 +3,8 @@ language: java
 jdk:
   - openjdk8
 
+install:
+  - ./gradlew build -x signArchives
+
 env:
 - TERM=dumb

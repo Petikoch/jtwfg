@@ -6,6 +6,7 @@ Peti Koch
 :github-user: Petikoch
 
 image:http://img.shields.io/badge/license-ASF2-blue.svg["Apache License 2", link="http://www.apache.org/licenses/LICENSE-2.0.txt"]
+image:http://img.shields.io/badge/download-latest-bb00bb.svg[link="https://search.maven.org/search?q=g:ch.petikoch.libs%20AND%20a:{project-name}"]
 image:https://travis-ci.org/{github-user}/{project-name}.svg?branch={github-branch}["Build Status", link="https://travis-ci.org/{github-user}/{project-name}"]
 
 == Introduction
@@ -126,7 +127,6 @@ Please create a github issue if you have zillions of tasks and run into performa
 To use this library you need
 
 * Java 8 or later
-* no other libraries as (transitive) dependencies needed
 
 == Installation
 
