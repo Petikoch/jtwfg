@@ -1,36 +1,38 @@
 plugins {
-    id "com.jfrog.bintray" version '1.6'          // https://github.com/bintray/gradle-bintray-plugin
-    id 'nu.studer.credentials' version '1.0.3'      // https://github.com/etiennestuder/gradle-credentials-plugin
-    id 'com.github.kt3k.coveralls' version '2.7.1'  // https://github.com/kt3k/coveralls-gradle-plugin
-    id 'com.github.hierynomus.license' version '0.11.0'  // https://github.com/hierynomus/license-gradle-plugin
-    id "com.github.ben-manes.versions" version "0.13.0"
+    id 'nu.studer.credentials' version '2.1'      // https://github.com/etiennestuder/gradle-credentials-plugin
+    id 'com.github.hierynomus.license' version '0.15.0'  // https://github.com/hierynomus/license-gradle-plugin
+    id "com.github.ben-manes.versions" version "0.38.0"
 }
 
 apply plugin: 'java'
 apply plugin: 'groovy'
-apply plugin: 'maven-publish'
-apply plugin: 'jacoco'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
-version = '1.0.5-SNAPSHOT'
+group = "ch.petikoch.libs"
+archivesBaseName = "jtwfg"
+version = '2.0.0'
 
-ext.artifactGroupId = 'ch.petikoch.libs'
-ext.description = 'A small java 7+ standalone library using a "task wait for graph" model to detect deadlocks'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
-ext.fileEncoding = 'UTF-8'
+ext["fileEncoding"] = 'UTF-8'
+ext["signing.keyId"] = credentials.gpgKeyId
+ext["signing.password"] = credentials.gpgKeyPassword
+ext["signing.secretKeyRingFile"] = credentials.gpgKeyFile
+ext["ossrhUsername"] = credentials.ossrhUsername
+ext["ossrhPassword"] = credentials.ossrhPassword
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    testCompile 'org.codehaus.groovy:groovy-all:2.4.7'
-    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+    testCompile 'org.codehaus.groovy:groovy-all:2.5.14'
+    testCompile('org.spockframework:spock-core:1.3-groovy-2.5') {
         exclude group: 'org.codehaus.groovy'
     }
-    testCompile 'com.google.guava:guava:20.0' // provides e.g. nice Multimap
+    testCompile 'com.google.guava:guava:30.1.1-jre' // provides e.g. nice Multimap
 }
 
 jar {
@@ -53,13 +55,22 @@ sourceSets.test.java.srcDirs = []
 sourceSets.main.groovy.srcDirs = []
 sourceSets.test.groovy.srcDirs = ['src/test/groovy']
 
+task javadocJar(type: Jar, dependsOn: classes) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
 }
 
 artifacts {
-    archives sourcesJar
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
 }
 
 tasks.withType(GroovyCompile) {
@@ -76,110 +87,55 @@ tasks.withType(Test) {
     maxParallelForks = Runtime.getRuntime().availableProcessors()
 }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-}
-
-def pomConfig = {
-    name project.name
-    description project.description
-    url 'https://github.com/Petikoch/jtwfg'
-    inceptionYear '2014'
-
-    scm { url 'https://github.com/Petikoch/jtwfg.git' }
-
-    developers {
-        developer {
-            id 'petikoch'
-            name 'Peti Koch'
-            email 'petikoch@gmail.com'
-            url 'https://www.google.com/+PetiKoch'
-        }
-        developer {
-            name 'Adrian Elsener'
-        }
-    }
-
-/*    contributors {
-        contributor {
-            name 'John Doe'
-        }
-    }*/
-}
-
-publishing {
-    publications {
-        mavenCustom(MavenPublication) {
-            groupId project.artifactGroupId
-            artifactId project.name
-            version project.version
-            from components.java
-
-            pom.withXml {
-
-                asNode().children().last() + pomConfig
-
-                def licencesNode = asNode().appendNode('licenses')
-                def licenseNode = licencesNode.appendNode('license')
-                licenseNode.appendNode('name', 'The Apache Software License, Version 2.0')
-                licenseNode.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
-                licenseNode.appendNode('distribution', 'repo')
-
-                // hack... build up the test dependencies ourselve
-                // why? because maven-publish plugin creates crapy dependencies in pom.xml (gradle 2.2)
-                // see http://stackoverflow.com/questions/20131915/publishing-artifact-from-gradle-project-to-bintray-maven-repository
-                // solution: http://stackoverflow.com/questions/24743562/gradle-not-including-dependencies-in-published-pom-xml
-                def dependenciesNode = asNode().appendNode('dependencies')
-                configurations.testCompile.allDependencies.each {
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', it.group)
-                    dependencyNode.appendNode('artifactId', it.name)
-                    dependencyNode.appendNode('version', it.version)
-                    dependencyNode.appendNode('scope', 'test')
-                }
-            }
-
-            artifact sourceJar {
-                classifier "sources"
-            }
-        }
-    }
-}
-
-model {
-    tasks.generatePomFileForMavenCustomPublication {
-        destination = file("$buildDir/generated_pom.xml")
-    }
-}
-
-bintray {
-    user = credentials.bintrayUserName       // https://github.com/etiennestuder/gradle-credentials-plugin
-    key = credentials.bintrayApiKey          // https://github.com/etiennestuder/gradle-credentials-plugin
-    publications = ['mavenCustom']   // see publications closure
-
-    publish true
-
-    pkg {
-        repo = 'maven'
-        name = project.name
-        desc = project.description // doesn't work
-        websiteUrl = 'https://github.com/Petikoch/jtwfg'
-        issueTrackerUrl = 'https://github.com/Petikoch/jtwfg/issues'
-        vcsUrl = 'https://github.com/Petikoch/jtwfg.git'
-        licenses = ['Apache-2.0']
-        labels = ['java']
-        publicDownloadNumbers = true
-    }
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled = true // coveralls plugin depends on xml format report
-        html.enabled = true
-    }
-}
-
 license {
     header = rootProject.file('config/HEADER')
     strictCheck = true
+}
+
+// https://central.sonatype.org/pages/gradle.html
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name project.archivesBaseName
+                packaging 'jar'
+                description 'A small java 8+ standalone library using a task wait for graph model to detect deadlocks'
+                url 'https://github.com/Petikoch/jtwfg'
+
+                scm {
+                    connection = 'https://github.com/Petikoch/jtwfg.git'
+                    developerConnection = 'https://github.com/Petikoch/jtwfg.git'
+                    url = 'https://github.com/Petikoch/jtwfg'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'petikoch'
+                        name 'Peti Koch'
+                        email 'petikoch@gmail.com'
+                    }
+                    developer {
+                        name 'Adrian Elsener'
+                    }
+                }
+            }
+        }
+    }
 }
