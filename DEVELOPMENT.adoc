@@ -1,0 +1,31 @@
+= Some hints regarding development of this library
+Peti Koch
+:imagesdir: ./docs
+
+== The release process
+
+* In your local IDE
+** check that the local branch is up-to-date
+** Check everything (code, docs, ...) is fine in the repo and ready to release
+** Write/check the release notes in `next_releasenotes_draft.md`
+** Set the version in `build.gradle`
+** Commit and push
+** run gradle task `uploadArchives` locally
+* Check the newly created staging repo in https://s01.oss.sonatype.org/#stagingRepositories
+** are the artifacts ok?
+** is the pom correct?
+** If not, drop the staging repo, fix whatever needs a fix and try again
+** If everything is fine
+*** Do `close` the staging respository (takes a couple of seconds, this will check the artifacts)
+*** Do `release` the staging respository
+*** After 10 - 15 minutes the new artifacts should be available on Maven Central
+* Create manually in the Github webpage a new release under "releases" / "Draft a new release"
+** set the git tag with the version from `build.gradle`
+** set the release title with the version from `build.gradle`
+** use the text from `next_releasenotes_draft.md` for the release description
+** click "publish release"
+* In your local IDE
+** Update your local branch (git pull)
+** Set the version in `build.gradle` to the next SNAPSHOT version
+** Clear `next_releasenotes_draft.md`
+** Commit and push
