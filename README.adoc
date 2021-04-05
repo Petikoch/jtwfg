@@ -143,7 +143,7 @@ repositories {
 }
 
 dependencies {
-    compile 'ch.petikoch.libs:jtwfg:x.y.z'
+    compile 'ch.petikoch.libs:jtwfg:x.y.z' // replace x.y.z with the real version
 
     // or "latest" release, for the braves:
     //compile 'ch.petikoch.libs:jtwfg:+'
@@ -159,7 +159,7 @@ Add jtwfg as dependency to your pom.xml:
         <dependency>
             <groupId>ch.petikoch.libs</groupId>
             <artifactId>jtwfg</artifactId>
-            <version>x.y.z</version>
+            <version>x.y.z</version> <!-- replace x.y.z with the real version -->
             <!-- or latest release, for the braves
             <version>RELEASE</version>
             -->
