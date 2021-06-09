@@ -38,6 +38,12 @@ public class GraphBuilder<T> {
 
     private final Object internalLock = new Object();
 
+    public static enum AddNoDeadlockResult {
+        ALREADY_PRESENT,
+        WOULD_FORM_DEADLOCK,
+        ADDED
+    }
+
     /**
      * Adds a task in the graph, if not yet present.
      *
@@ -134,6 +140,26 @@ public class GraphBuilder<T> {
         return this;
     }
 
+
+    /**
+     * Removes the "wait for" dependency (and only the "wait for", not the tasks itself).
+     * Does not throw an exception in case the taskId did not wait on waitingOnTaskId.
+     *
+     * @param taskId          not null
+     * @param waitingOnTaskId not null
+     * @return the GraphBuilder instance itself
+     */
+    public GraphBuilder<T> removeTaskWaitForDependencyUnsafe(T taskId, T waitingOnTaskId) {
+        synchronized (internalLock) {
+            Task<T> task = taskMap.get(taskId);
+            Preconditions.checkArgumentNotNull(task, "taskId " + taskId + " is unknown");
+            Task<T> waitingOnTask = taskMap.get(waitingOnTaskId);
+            Preconditions.checkArgumentNotNull(waitingOnTask, "taskId " + waitingOnTaskId + " is unknown");
+            task.removeWaitFor(waitingOnTask);
+        }
+        return this;
+    }
+
     /**
      * Adds a couple of taskIds in the graph, if not yet present.
      *
@@ -163,6 +189,32 @@ public class GraphBuilder<T> {
             task.addWaitFor(waitingOnTask);
         }
         return this;
+    }
+
+
+    /**
+     * Adds an edge between two tasks in the graph, if not yet present and if no dead lock cycle would be formed 
+     * when adding the edge.
+     * @param taskId          not null
+     * @param waitingOnTaskId not null
+     * @return the GraphBuilder instance itself
+     */
+    public AddNoDeadlockResult addTaskWaitsForIfNoDeadlockCycle(T taskId, T waitingOnTaskId) {
+        synchronized (internalLock) {
+            Task<T> task = getOrAddTaskRepresentator(taskId);
+            Task<T> waitingOnTask = getOrAddTaskRepresentator(waitingOnTaskId);
+            if (!task.addWaitForSuccessful(waitingOnTask)) {
+                return AddNoDeadlockResult.ALREADY_PRESENT;
+            }
+
+            if (DeadlockDetector.hasDeadlockOn(waitingOnTask)) {
+                //Revert the change.
+                removeTaskWaitForDependency(taskId, waitingOnTaskId);
+                return AddNoDeadlockResult.WOULD_FORM_DEADLOCK;
+            } else {
+                return AddNoDeadlockResult.ADDED;
+            }
+        }
     }
 
     /**

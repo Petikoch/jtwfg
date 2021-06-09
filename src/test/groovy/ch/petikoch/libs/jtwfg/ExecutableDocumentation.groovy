@@ -61,7 +61,7 @@ class ExecutableDocumentation extends Specification {
 
 		and: 'run a deadlock analysis using the jtwfg deadlock detector'
 
-		def analysisResult = new DeadlockDetector().analyze(jtwfgGraph)
+		def analysisResult = DeadlockDetector.analyze(jtwfgGraph)
 
 		then: 'you check for deadlocks in the analysis report'
 
@@ -83,15 +83,13 @@ class ExecutableDocumentation extends Specification {
 		and: 'the jtwfg GraphBuilder with a DeadlockDetector'
 
 		def jtwfgGraphBuilder = new GraphBuilder<String>()
-		def jtwfgDeadlockDetector = new DeadlockDetector<String>()
-
 		when: 'you add a task into your model, you add it also into the jtwfg model (might be a separate thread)'
 
 		yourModelTasks.add('t1')
 		jtwfgGraphBuilder.addTask('t1')
 
 		then: 'you immediately check for deadlocks'
-		jtwfgDeadlockDetector.analyze(jtwfgGraphBuilder.build()).hasDeadlock() == false
+		DeadlockDetector.analyze(jtwfgGraphBuilder.build()).hasDeadlock() == false
 
 		when: 'you add more tasks, you update your model and the jtwfg model (might be a separate thread)'
 
@@ -107,7 +105,7 @@ class ExecutableDocumentation extends Specification {
 
 		and: 'you immediately check for deadlocks again'
 
-		def analysisReport = jtwfgDeadlockDetector.analyze(jtwfgGraphBuilder.build())
+		def analysisReport = DeadlockDetector.analyze(jtwfgGraphBuilder.build())
 
 		then: 'you see if you have a deadlock'
 

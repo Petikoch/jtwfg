@@ -20,7 +20,6 @@ import spock.lang.Specification
 class DeadlockDetectorTest extends Specification {
 
 	def graphBuilder = new GraphBuilder<String>()
-	def testee = new DeadlockDetector<String>()
 
 	def 'findDeadlock: Simple direct cycle'() {
 		given:
@@ -29,7 +28,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -44,7 +43,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -58,7 +57,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.addTasks(['t1', 't2', 't3', 't4']).build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -74,7 +73,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -98,7 +97,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -128,7 +127,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -154,7 +153,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -174,7 +173,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -194,7 +193,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -210,7 +209,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -238,7 +237,7 @@ class DeadlockDetectorTest extends Specification {
 
 		when:
 		def graph = graphBuilder.build()
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -258,7 +257,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null
@@ -279,7 +278,7 @@ class DeadlockDetectorTest extends Specification {
 		def graph = graphBuilder.build()
 
 		when:
-		def result = testee.analyze(graph)
+		def result = DeadlockDetector.analyze(graph)
 
 		then:
 		result != null

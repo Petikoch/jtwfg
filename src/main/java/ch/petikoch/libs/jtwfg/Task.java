@@ -48,6 +48,10 @@ public class Task<T> implements Comparable<Task<T>> {
         return this;
     }
 
+    boolean addWaitForSuccessful(Task<T> other) {
+        return waitsForTasks.add(other);
+    }
+
     boolean removeWaitFor(Task<T> other) {
         return waitsForTasks.remove(other);
     }

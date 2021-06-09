@@ -23,20 +23,45 @@ import java.util.*;
  * <p>
  * Immutable / thread-safe.
  *
- * @param <T> The type of the ID of the tasks. Something with a meaningful {@link Object#equals(Object)} and {@link
+ * <T> refers to the type of the ID of the tasks. Something with a meaningful {@link Object#equals(Object)} and {@link
  *            Object#hashCode()} implementation like {@link String}, {@link Long} or a class of your domain model which is fine
  *            to use as a key e.g. in a {@link java.util.HashMap}. If T implements Comparable, then you get sorted collections.
  */
-public class DeadlockDetector<T> {
+public class DeadlockDetector {
 
-    public DeadlockAnalysisResult<T> analyze(final Graph<T> graph) {
+    /**
+     * Checks very fast whether there is a deadlock involving a particular task.
+     * @param task the task
+     * @param <T> the type of the ID of the tasks (see class javadoc).
+     * @return true if there is a deadlock involving task.
+     */
+    public static <T> boolean hasDeadlockOn(Task<T> task) {
+        //Very simple, since we are not interested in detailed information.
+        //If we encounter the same node twice when traversing the graph.
+        Stack<Task<T>> workstack = new Stack<>();
+        Set<Task<T>> seen = new HashSet<>();
+        seen.add(task);
+        workstack.push(task);
+        while (!workstack.isEmpty()) {
+            Task<T> element = workstack.pop();
+            for (Task<T> wtask : element.getWaitsForTasks()) {
+                if (!seen.add(wtask)) {
+                    return true;
+                }
+                workstack.push(wtask);
+            }
+        }
+        return false;
+    }
+
+    public static <T> DeadlockAnalysisResult analyze(final Graph<T> graph) {
         Set<DeadlockCycle<T>> cycleCollector = new LinkedHashSet<>();
         findCycles(graph, cycleCollector);
         Set<DeadlockCycle<T>> cyclesWithAlsoDeadlocked = findAlsoDeadlocked(graph, Collections.unmodifiableSet(cycleCollector));
         return new DeadlockAnalysisResult<>(cyclesWithAlsoDeadlocked);
     }
 
-    private void findCycles(Graph<T> graph,
+    private static <T> void findCycles(Graph<T> graph,
                             Set<DeadlockCycle<T>> cycleCollector) {
         for (Task<T> startTask : graph.getTasks()) {
             Set<Task<T>> visitedTasks = new HashSet<>();
@@ -44,7 +69,7 @@ public class DeadlockDetector<T> {
         }
     }
 
-    private Set<DeadlockCycle<T>> findAlsoDeadlocked(final Graph<T> graph,
+    private static <T> Set<DeadlockCycle<T>> findAlsoDeadlocked(final Graph<T> graph,
                                                      final Set<DeadlockCycle<T>> deadlockCycles) {
         Set<DeadlockCycle<T>> enrichedDeadlockCycles = deadlockCycles;
         boolean moreDeadlockedFound = true;
@@ -59,7 +84,7 @@ public class DeadlockDetector<T> {
         return enrichedDeadlockCycles;
     }
 
-    private Set<DeadlockCycle<T>> findSomeMoreDeadlocked(final Graph<T> graph,
+    private static <T> Set<DeadlockCycle<T>> findSomeMoreDeadlocked(final Graph<T> graph,
                                                          final Set<DeadlockCycle<T>> originalDeadlockCycles) {
         Set<DeadlockCycle<T>> enrichedDeadLockCyclesCollector = new LinkedHashSet<>();
         for (DeadlockCycle<T> originalDeadlockCycle : originalDeadlockCycles) {

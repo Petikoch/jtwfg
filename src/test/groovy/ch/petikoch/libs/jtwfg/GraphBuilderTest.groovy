@@ -366,4 +366,21 @@ class GraphBuilderTest extends Specification {
 		graph != null
 		graph.getTasks().collect { it.getId() }.toSet().containsAll(mainThreadTaskIds)
 	}
+
+
+
+	def 'addTaskWaitsForIfNoDeadlockCycle: only adds edges in case there is no cycle'() {
+		setup:
+		def taskId1 = 't1'
+		def taskId2 = 't2'
+		def taskId3 = 't3'
+
+		expect:
+		testee.addTaskWaitsForIfNoDeadlockCycle(taskId1, taskId2) == GraphBuilder.AddNoDeadlockResult.ADDED
+		testee.addTaskWaitsForIfNoDeadlockCycle(taskId2, taskId3) == GraphBuilder.AddNoDeadlockResult.ADDED
+		testee.addTaskWaitsForIfNoDeadlockCycle(taskId2, taskId3) == GraphBuilder.AddNoDeadlockResult.ALREADY_PRESENT
+		testee.addTaskWaitsForIfNoDeadlockCycle(taskId3, taskId1) == GraphBuilder.AddNoDeadlockResult.WOULD_FORM_DEADLOCK
+		testee.addTaskWaitsForIfNoDeadlockCycle(taskId1, taskId3) == GraphBuilder.AddNoDeadlockResult.ADDED
+	}
+
 }
