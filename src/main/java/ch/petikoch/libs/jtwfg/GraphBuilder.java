@@ -127,15 +127,9 @@ public class GraphBuilder<T> {
      * @return the GraphBuilder instance itself
      */
     public GraphBuilder<T> removeTaskWaitForDependency(T taskId, T waitingOnTaskId) {
-        synchronized (internalLock) {
-            Task<T> task = taskMap.get(taskId);
-            Preconditions.checkArgumentNotNull(task, "taskId " + taskId + " is unknown");
-            Task<T> waitingOnTask = taskMap.get(waitingOnTaskId);
-            Preconditions.checkArgumentNotNull(waitingOnTask, "taskId " + waitingOnTaskId + " is unknown");
-            boolean removed = task.removeWaitFor(waitingOnTask);
-            if (!removed) {
-                throw new IllegalArgumentException(taskId + " is existing but was not waiting on " + waitingOnTaskId);
-            }
+        boolean removed = removeTaskWaitForDependencySuccessful(taskId, waitingOnTaskId);
+        if (!removed) {
+            throw new IllegalArgumentException(taskId + " is existing but was not waiting on " + waitingOnTaskId);
         }
         return this;
     }
@@ -150,14 +144,19 @@ public class GraphBuilder<T> {
      * @return the GraphBuilder instance itself
      */
     public GraphBuilder<T> removeTaskWaitForDependencyUnsafe(T taskId, T waitingOnTaskId) {
+        removeTaskWaitForDependencySuccessful(taskId, waitingOnTaskId);
+        return this;
+    }
+
+
+    private boolean removeTaskWaitForDependencySuccessful(T taskId, T waitingOnTaskId) {
         synchronized (internalLock) {
             Task<T> task = taskMap.get(taskId);
             Preconditions.checkArgumentNotNull(task, "taskId " + taskId + " is unknown");
             Task<T> waitingOnTask = taskMap.get(waitingOnTaskId);
             Preconditions.checkArgumentNotNull(waitingOnTask, "taskId " + waitingOnTaskId + " is unknown");
-            task.removeWaitFor(waitingOnTask);
+            return task.removeWaitFor(waitingOnTask);
         }
-        return this;
     }
 
     /**
