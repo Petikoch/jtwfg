@@ -38,9 +38,24 @@ public class GraphBuilder<T> {
 
     private final Object internalLock = new Object();
 
+    /**
+     * Is used to represent different possibilites
+     * when trying to add a task wait without a deadlock
+     */
     public static enum AddNoDeadlockResult {
+        /**
+         * This particular link is already present within the graph.
+         */
         ALREADY_PRESENT,
+
+        /**
+         * Adding a task would form a deadlock.
+         */
         WOULD_FORM_DEADLOCK,
+
+        /**
+         * The task wait relationship could be added successfully without a deadlock.
+         */
         ADDED
     }
 
