@@ -183,6 +183,10 @@ To run a build of the jtwfg project on your machine, clone the git repo to your 
 > ./gradlew build
 ----
 
+== How to contribute
+
+See xref:DEVELOPMENT.adoc[DEVELOPMENT.adoc]
+
 == My motivation to create jtwfg
 
 === Motivation 1
