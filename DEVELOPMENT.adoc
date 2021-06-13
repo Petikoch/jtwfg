@@ -2,6 +2,14 @@
 Peti Koch
 :imagesdir: ./docs
 
+== How to contribute
+
+* Before you create a pull request, please create first a Github issue for the feature you would like to add or for the thing you want to change in this library
+** We will then have first a discussion before you start changing the code
+** This will save time both for you and me and we will reach faster an agreement for the change you intend
+* Please create separate issues for separate things
+* Please create separate pull requests for separate issues
+
 == The release process
 
 * In your local IDE
