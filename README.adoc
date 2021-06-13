@@ -76,12 +76,12 @@ You transform your domain model objects into the (simple) jtwfg model objects us
 
 [source,java]
 ----
-GraphBuilder builder = new GraphBuilder();
+GraphBuilder<String> builder = new GraphBuilder<>();
 builder.addTaskWaitsFor("task 1", "task 2");
 builder.addTaskWaitsFor("task 2", "task 1");
 builder.addTask("task 3");
 builder.addTask("task 4");
-Graph graph = builder.build();
+Graph<String> graph = builder.build();
 ----
 
 ==== Step 2
@@ -90,8 +90,8 @@ As soon as you have a jtwfg graph instance, you can use the jtwfg deadlock detec
 
 [source,java]
 ----
-DeadlockDetector deadlockDetector = new DeadlockDetector();
-DeadlockAnalysisResult analyzisResult = deadlockDetector.analyze(graph);
+DeadlockDetector<String> deadlockDetector = new DeadlockDetector<>();
+DeadlockAnalysisResult<String>  analyzisResult = deadlockDetector.analyze(graph);
 if(analyzisResult.hasDeadlock()){
    // do something in your domain like throwing an exception or killing a task or ...
    //
